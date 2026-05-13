@@ -1,0 +1,53 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+//generator client {
+//  provider = "prisma-client"
+//  output   = "../src/generated/prisma"
+//}
+
+//datasource db {
+//  provider = "postgresql"
+//}
+
+// TODO OJO CODIGO SUCIO
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Comprador {
+  id              Int      @id @default(autoincrement())
+  dni             String   @unique
+  cuilCuit        String   @unique
+  apellido        String
+  nombre          String
+  sexo            String?
+  direccion       String
+  mail            String   @unique
+  celular         String
+  fechaNacimiento DateTime
+  nacionalidad    String
+  condicionIva    String
+  clerkUserId     String   @unique // UserID (Clerk) 
+  isDeleted       Boolean  @default(false)
+  pedidos         Pedido[]
+}
+
+model Pedido {
+  id          Int      @id @default(autoincrement())
+  fecha       DateTime @default(now())
+  compradorId Int
+  comprador   Comprador @relation(fields: [compradorId], references: [id])
+  vendedorId  Int      // Referencia a la Seller App
+  productosId Int[]    // Lista de IDs de productos
+  monto       Float
+  estado      String
+  envioId     Int?     // Referencia a la Shipping App
+}
