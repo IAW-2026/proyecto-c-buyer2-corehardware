@@ -1,4 +1,4 @@
-import { MOCK_PRODUCTS, Product } from '@/data/mockProducts';
+import { MOCK_PRODUCTS_SUMMARY, MOCK_PRODUCTS_DETAIL, ProductSummary, Product } from '@/data/mockProducts';
 
 interface GetProductsParams {
   offset?: number;
@@ -12,12 +12,11 @@ export const getProducts = async ({
   limit = 20, 
   name = '', 
   brand = '' 
-}: GetProductsParams = {}) => {
+}: GetProductsParams = {}): Promise<{ items: ProductSummary[], total: number }> => {
   
   const baseUrl = `${process.env.NEXT_PUBLIC_SELLER_API_URL}/products`;
   const apiKey = process.env.NEXT_PUBLIC_SELLER_API_KEY;
 
-  // Construcción de la URL con Query Params
   const url = new URL(baseUrl);
   url.searchParams.append('offset', offset.toString());
   url.searchParams.append('limit', limit.toString());
@@ -33,9 +32,8 @@ export const getProducts = async ({
       }
     });
 
-    // Manejo de respuestas según el contrato
     if (response.status === 204) {
-      return { items: [], total: 0 }; // Respuesta exitosa pero vacía
+      return { items: [], total: 0 };
     }
 
     if (response.status === 404) {
@@ -48,17 +46,15 @@ export const getProducts = async ({
 
     const data = await response.json();
     return {
-      items: data, // La API devuelve la lista directa
-      total: 45    // Idealmente la API debería devolver el total, si no lo hace, usamos el del mock
+      items: data,
+      total: MOCK_PRODUCTS_SUMMARY.length
     };
 
   } catch (error) {
-    // Lógica de Mocking para desarrollo
-    console.log("Modo desarrollo: Usando MOCK_PRODUCTS");
+    console.log("Modo desarrollo: Usando MOCK_PRODUCTS_SUMMARY");
     
-    // Simulamos el filtrado y paginado en los mocks para que tu UI funcione igual
-    let filtered = [...MOCK_PRODUCTS];
-    
+    let filtered = [...MOCK_PRODUCTS_SUMMARY]; // ← cambio
+
     if (name) {
       filtered = filtered.filter(p => p.nombre.toLowerCase().includes(name.toLowerCase()));
     }
@@ -78,7 +74,7 @@ export const getProducts = async ({
 /**
  * GET api/products/{id}
  */
-export const getProductById = async (id: number) => {
+export const getProductById = async (id: number): Promise<Product | null> => {
   const url = `${process.env.NEXT_PUBLIC_SELLER_API_URL}/products/${id}`;
   const apiKey = process.env.NEXT_PUBLIC_SELLER_API_KEY;
 
@@ -97,7 +93,7 @@ export const getProductById = async (id: number) => {
     return await response.json();
 
   } catch (error) {
-    // Si falla, buscamos en los mocks
-    return MOCK_PRODUCTS.find(p => p.id === id) || null;
+    console.log("Modo desarrollo: Usando MOCK_PRODUCTS_DETAIL");
+    return MOCK_PRODUCTS_DETAIL.find(p => p.id === id) || null; // ← cambio
   }
 };
