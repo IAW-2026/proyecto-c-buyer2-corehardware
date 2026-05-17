@@ -1,13 +1,14 @@
 'use client'
 import { useState, useEffect } from 'react'
 import {
-  Box, Flex, IconButton, Image, SimpleGrid, Text,
+  Box, Flex, Image, SimpleGrid, Text,
   Button, Heading, Badge, VStack, Spinner, Center
 } from '@chakra-ui/react'
-import { FaSearch, FaChevronLeft, FaChevronRight } from 'react-icons/fa'
+import { FaSearch } from 'react-icons/fa'
 import Link from 'next/link'
 import { getProducts } from '@/services/productService'
-import AppNavbar from '@/components/AppNavbar' // Ajustado a la ruta limpia
+import AppNavbar from '@/components/AppNavbar'
+import Pagination from '@/components/Pagination'
 
 export default function ListadoProductos() {
   const [data, setData] = useState<{ items: any[], total: number }>({ items: [], total: 0 });
@@ -15,65 +16,40 @@ export default function ListadoProductos() {
   const [offset, setOffset] = useState(0);
   const limit = 20;
 
-  const colors = {
-    bgMain: "#0D1117",
-    bgCard: "#161B22",
-    accent: "#00D1FF",
-    border: "#21262D",
-    textMain: "#E6EDF3",
-    textMuted: "#8B949E"
-  }
-
   useEffect(() => {
     const cargarDatos = async () => {
       setLoading(true);
       try {
         const res = await getProducts({ offset, limit });
-
-        // Si la API o el servicio fallan y devuelven algo raro (null, undefined, etc.)
-        // nos aseguramos de setear un objeto válido para que el .map() no explote.
         if (res && res.items) {
           setData(res);
         } else {
           setData({ items: [], total: 0 });
         }
-
       } catch (error) {
         console.error("Error cargando productos:", error);
-        // Si hay un error de red, también reseteamos a un estado seguro
         setData({ items: [], total: 0 });
       } finally {
         setLoading(false);
       }
     };
     cargarDatos();
-  }, [offset, limit]); // Agregué limit aunque es constante
+  }, [offset, limit]);
 
-  // LÓGICA DE PAGINACIÓN
-  const nextPage = () => {
-    if (offset + limit < data.total) {
-      setOffset(prev => prev + limit);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-  };
-
-  const prevPage = () => {
-    setOffset(prev => Math.max(0, prev - limit));
+  // Manejador centralizado para el cambio de página con comportamiento suave
+  const handlePageChange = (newOffset: number) => {
+    setOffset(newOffset);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const currentPage = Math.floor(offset / limit) + 1;
-
-  // --- RENDERS CONDICIONALES ---
-
   if (loading) {
     return (
-      <Box bg={colors.bgMain} minH="100vh">
+      <Box bg="brand.bgMain" minH="100vh">
         <AppNavbar />
         <Center mt={20}>
           <VStack gap={4}>
-            <Spinner color={colors.accent} size="xl" borderWidth="4px" />
-            <Text color={colors.accent} fontWeight="bold" letterSpacing="widest">CARGANDO HARDWARE...</Text>
+            <Spinner color="brand.accent" size="xl" borderWidth="4px" />
+            <Text color="brand.accent" fontWeight="bold" letterSpacing="widest">CARGANDO HARDWARE...</Text>
           </VStack>
         </Center>
       </Box>
@@ -82,24 +58,24 @@ export default function ListadoProductos() {
 
   if (data.items?.length === 0) {
     return (
-      <Box bg={colors.bgMain} minH="100vh">
+      <Box bg="brand.bgMain" minH="100vh">
         <AppNavbar />
         <Center mt={20} p={10}>
           <VStack gap={6}>
-            <Box fontSize="6xl" color={colors.accent}><FaSearch /></Box>
-            <Heading size="lg" textAlign="center" color={colors.textMain}>No hay productos disponibles</Heading>
+            <Box fontSize="6xl" color="brand.accent"><FaSearch /></Box>
+            <Heading size="lg" textAlign="center" color="brand.textMain">No hay productos disponibles</Heading>
             <Button
               variant="outline"
-              borderColor={colors.accent}
-              color={colors.accent}
+              borderColor="brand.accent"
+              color="brand.accent"
               onClick={() => window.location.reload()}
               borderRadius="full"
               px={10}            
-              py={6}             
+              py={6}            
               fontSize="md"      
               fontWeight="bold"
               _hover={{
-                bg: "rgba(0, 209, 255, 0.1)", // Un brillo sutil al pasar el mouse
+                bg: "rgba(0, 209, 255, 0.1)",
                 transform: "scale(1.05)",
                 borderColor: "white",
                 color: "white"
@@ -114,21 +90,21 @@ export default function ListadoProductos() {
   }
 
   return (
-    <Box bg={colors.bgMain} minH="100vh" color={colors.textMain}>
+    <Box bg="brand.bgMain" minH="100vh" color="brand.textMain">
       <AppNavbar />
 
       {/* BANNER */}
       <Box w="full" px={8} mt={6}>
         <Box
           w="full" h="150px"
-          bgGradient="to-r" gradientFrom={colors.bgCard} gradientTo={colors.border}
+          bgGradient="to-r" gradientFrom="brand.bgCard" gradientTo="brand.border"
           borderRadius="2xl" display="flex" alignItems="center" px={12}
-          border="1px solid" borderColor={colors.border}
+          border="1px solid" borderColor="brand.border"
         >
           <VStack align="start" gap="0">
             <Badge variant="outline" colorPalette="cyan" mb={2}>CATÁLOGO OFICIAL</Badge>
             <Heading size="xl">CORE HARDWARE</Heading>
-            <Text color={colors.textMuted}>Explorando {data.total} componentes disponibles.</Text>
+            <Text color="brand.textMuted">Explorando {data.total} componentes disponibles.</Text>
           </VStack>
         </Box>
       </Box>
@@ -139,15 +115,15 @@ export default function ListadoProductos() {
           {data.items?.map((prod) => (
             <Box
               key={prod.id}
-              bg={colors.bgCard}
+              bg="brand.bgCard"
               borderRadius="xl"
               overflow="hidden"
               border="1px solid"
-              borderColor={colors.border}
+              borderColor="brand.border"
               transition="all 0.3s ease"
               _hover={{
                 transform: "translateY(-5px)",
-                borderColor: colors.accent,
+                borderColor: "brand.accent",
                 shadow: `0 0 20px rgba(0, 209, 255, 0.15)`
               }}
             >
@@ -161,21 +137,21 @@ export default function ListadoProductos() {
                   />
                 </Box>
                 <Box p={4}>
-                  <Text fontWeight="bold" fontSize="xs" color={colors.accent} mb={1}>
+                  <Text fontWeight="bold" fontSize="xs" color="brand.accent" mb={1}>
                     {prod.marca?.toUpperCase() || 'GENERIC'}
                   </Text>
-                  <Text fontWeight="bold" fontSize="md" color={colors.textMain} lineClamp={2} mb={2} h="2.8rem">
+                  <Text fontWeight="bold" fontSize="md" color="brand.textMain" lineClamp={2} mb={2} h="2.8rem">
                     {prod.nombre}
                   </Text>
-                  <Text fontSize="xl" fontWeight="black" color={colors.textMain}>
+                  <Text fontSize="xl" fontWeight="black" color="brand.textMain">
                     ${prod.precio.toLocaleString('es-AR')}
                   </Text>
                 </Box>
               </Link>
               <Box p={4} pt={0}>
                 <Button
-                  bg={colors.accent}
-                  color={colors.bgMain}
+                  bg="brand.accent"
+                  color="brand.bgMain"
                   w="full"
                   fontWeight="bold"
                   size="sm"
@@ -188,44 +164,14 @@ export default function ListadoProductos() {
           ))}
         </SimpleGrid>
 
-        {/* PAGINACIÓN DINÁMICA */}
-        <Flex justify="center" mt={16} gap="4" pb={12} align="center">
-          <IconButton
-            aria-label="Anterior"
-            variant="ghost"
-            color={colors.accent}
-            onClick={prevPage}
-            disabled={offset === 0}
-            _hover={{ bg: colors.bgCard }}
-            fontSize="20px"
-          >
-            <FaChevronLeft />
-          </IconButton>
-
-          <Flex
-            bg={colors.accent}
-            color={colors.bgMain}
-            w="50px" h="50px"
-            align="center" justify="center"
-            borderRadius="full"
-            fontWeight="black"
-            boxShadow={`0 0 15px ${colors.accent}44`}
-          >
-            {currentPage}
-          </Flex>
-
-          <IconButton
-            aria-label="Siguiente"
-            variant="ghost"
-            color={colors.accent}
-            onClick={nextPage}
-            disabled={offset + limit >= data.total}
-            _hover={{ bg: colors.bgCard }}
-            fontSize="20px"
-          >
-            <FaChevronRight />
-          </IconButton>
-        </Flex>
+        {/* COMPONENTE DE PAGINACIÓN OPTIMIZADO */}
+        <Pagination 
+          totalItems={data.total} 
+          limit={limit} 
+          offset={offset} 
+          onPageChange={handlePageChange} 
+        />
+        
       </Box>
     </Box>
   )
