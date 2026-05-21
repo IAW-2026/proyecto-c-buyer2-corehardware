@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Providers } from "./providers";
 import { ClerkProvider } from "@clerk/nextjs";
+import { CartProvider } from "@/context/CartContext"; 
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -13,7 +14,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <ClerkProvider>
       <html lang="es" suppressHydrationWarning>
         <body>
-          <Providers>{children}</Providers>
+          <Providers>
+            <CartProvider>
+              {children}
+            </CartProvider>
+          </Providers>
         </body>
       </html>
     </ClerkProvider>

@@ -8,6 +8,7 @@ import { FaArrowLeft, FaShoppingCart, FaShieldAlt, FaBox } from 'react-icons/fa'
 import { useRouter, useParams } from 'next/navigation'
 import { getProductById } from '@/services/productService'
 import AppNavbar from '@/components/AppNavbar'
+import { BackButton } from '@/components/ui/BackButton'
 
 export default function DetalleProducto() {
     const router = useRouter()
@@ -75,20 +76,7 @@ export default function DetalleProducto() {
         <Box bg="brand.bgMain" minH="100vh" color="brand.textMain">
             <AppNavbar />
 
-            {/* BOTON VOLVER */}
-            <Box px={{ base: 4, md: 8 }} pt={6}>
-                <Button
-                    variant="ghost"
-                    color="brand.accent"
-                    onClick={() => router.back()}
-                    aria-label="Volver al listado de productos"
-                    _hover={{ bg: "brand.bgCard" }}
-                    px={2}
-                >
-                    <FaArrowLeft />
-                    <Text ml={2}>Volver</Text>
-                </Button>
-            </Box>
+            <BackButton />
 
             {/* CONTENIDO PRINCIPAL */}
             <Box px={{ base: 4, md: 8 }} py={6}>
@@ -118,11 +106,11 @@ export default function DetalleProducto() {
                         />
                     </Box>
 
-                    {/* DATOS */} {/*  TODO*/} 
+                    {/* DATOS */} {/*  TODO*/}
                     <VStack align="flex-start" gap={4} flex={1}>
                         {/* <Badge variant="outline" colorPalette="cyan">
               {producto.marca?.toUpperCase() || 'GENERIC'}
-            </Badge> */} 
+            </Badge> */}
                         <Badge
                             bg="brand.accent"
                             color="brand.bgMain"

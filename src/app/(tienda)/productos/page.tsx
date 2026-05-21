@@ -10,7 +10,8 @@ import Link from 'next/link'
 import { getProducts } from '@/services/productService'
 import AppNavbar from '@/components/AppNavbar'
 import Pagination from '@/components/Pagination'
-
+import { AddToCartButton } from '@/components/ui/AddToCartButton'
+import { Producto } from '@/types/producto'
 
 function HydrationLoader() {
   return <div style={{ backgroundColor: "#0D1117", minHeight: "100vh" }} />
@@ -18,7 +19,8 @@ function HydrationLoader() {
 
 export default function ListadoProductos() {
   const [mounted, setMounted] = useState(false)
-  const [data, setData] = useState<{ items: any[], total: number }>({ items: [], total: 0 });
+  // 2. TIPADO EXPLÍCITO DE LOS PRODUCTOS
+  const [data, setData] = useState<{ items: Producto[], total: number }>({ items: [], total: 0 });
   const [loading, setLoading] = useState(false);
   const [offset, setOffset] = useState(0);
   const limit = 20;
@@ -38,7 +40,7 @@ export default function ListadoProductos() {
         setData({ items: [], total: 0 });
       } finally {
         setLoading(false);
-        setMounted(true); // Avisa que ya estamos en el cliente
+        setMounted(true);
       }
     };
     cargarDatos();
@@ -51,7 +53,6 @@ export default function ListadoProductos() {
 
   if (loading) {
     if (!mounted) return <HydrationLoader />
-
     return (
       <Box bg="brand.bgMain" minH="100vh">
         <AppNavbar />
@@ -67,7 +68,6 @@ export default function ListadoProductos() {
 
   if (data.items?.length === 0) {
     if (!mounted) return <HydrationLoader />
-
     return (
       <Box bg="brand.bgMain" minH="100vh">
         <AppNavbar />
@@ -76,21 +76,9 @@ export default function ListadoProductos() {
             <Box fontSize="6xl" color="brand.accent"><FaSearch /></Box>
             <Heading size="lg" textAlign="center" color="brand.textMain">No hay productos disponibles</Heading>
             <Button
-              variant="outline"
-              borderColor="brand.accent"
-              color="brand.accent"
-              onClick={() => window.location.reload()}
-              borderRadius="full"
-              px={10}
-              py={6}
-              fontSize="md"
-              fontWeight="bold"
-              _hover={{
-                bg: "rgba(0, 209, 255, 0.1)",
-                transform: "scale(1.05)",
-                borderColor: "white",
-                color: "white"
-              }}
+              variant="outline" borderColor="brand.accent" color="brand.accent"
+              onClick={() => window.location.reload()} borderRadius="full"
+              px={10} py={6} fontSize="md" fontWeight="bold"
             >
               Reintentar
             </Button>
@@ -106,7 +94,6 @@ export default function ListadoProductos() {
     <Box bg="brand.bgMain" minH="100vh" color="brand.textMain">
       <AppNavbar />
 
-      {/* BANNER */}
       <Box w="full" px={8} mt={6}>
         <Box
           w="full" h="150px"
@@ -122,7 +109,6 @@ export default function ListadoProductos() {
         </Box>
       </Box>
 
-      {/* GRILLA DE PRODUCTOS */}
       <Box w="full" px={8} py={10}>
         <SimpleGrid columns={{ base: 1, sm: 2, md: 3, lg: 4, xl: 6 }} gap="6">
           {data.items?.map((prod) => (
@@ -134,11 +120,7 @@ export default function ListadoProductos() {
               border="1px solid"
               borderColor="brand.border"
               transition="all 0.3s ease"
-              _hover={{
-                transform: "translateY(-5px)",
-                borderColor: "brand.accent",
-                shadow: `0 0 20px rgba(0, 209, 255, 0.15)`
-              }}
+              _hover={{ transform: "translateY(-5px)", borderColor: "brand.accent", shadow: `0 0 20px rgba(0, 209, 255, 0.15)` }}
             >
               <Link href={`/productos/${prod.id}`}>
                 <Box position="relative" pt="100%" bg="white">
@@ -161,17 +143,10 @@ export default function ListadoProductos() {
                   </Text>
                 </Box>
               </Link>
+              
+              {/* 3. INTEGRACIÓN DEL BOTÓN DE CARRITO ACCESIBLE */}
               <Box p={4} pt={0}>
-                <Button
-                  bg="brand.accent"
-                  color="brand.bgMain"
-                  w="full"
-                  fontWeight="bold"
-                  size="sm"
-                  _hover={{ bg: "white", transform: "scale(1.02)" }}
-                >
-                  Agregar al carrito
-                </Button>
+                <AddToCartButton producto={prod} />
               </Box>
             </Box>
           ))}
@@ -183,7 +158,6 @@ export default function ListadoProductos() {
           offset={offset}
           onPageChange={handlePageChange}
         />
-
       </Box>
     </Box>
   )

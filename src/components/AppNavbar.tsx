@@ -1,14 +1,16 @@
 'use client'
 
 import { useState } from 'react'
-import { Box, Flex, Heading, Text, HStack, Input, IconButton } from '@chakra-ui/react'
+import { Box, Flex, Heading, Text, HStack, Input, IconButton, Badge } from '@chakra-ui/react'
 import { FaSearch, FaUser, FaShoppingCart, FaTimes } from 'react-icons/fa'
 import { Show, UserButton } from '@clerk/nextjs'
 import Link from 'next/link'
 import AuthButton from '@/components/ui/AuthButton'
+import { useCart } from '@/context/CartContext'
 
 export default function AppNavbar() {
   const [searchOpen, setSearchOpen] = useState(false)
+  const { totalItems } = useCart()
 
   return (
     <Box
@@ -151,7 +153,7 @@ export default function AppNavbar() {
               w="36px"
               overflow="hidden"
             >
-              <UserButton 
+              <UserButton
                 appearance={{
                   elements: {
                     // Fuerza al disparador de Clerk a heredar el tamaño redondo exacto de tu contenedor
@@ -165,7 +167,7 @@ export default function AppNavbar() {
                     },
                     // Cambia el fondo violeta inicial de Clerk por un tono oscuro neutro o el acento de tu marca
                     userButtonAvatarFallback: {
-                      backgroundColor: "#00d1ff", 
+                      backgroundColor: "#00d1ff",
                       color: "#0d1117",
                       fontWeight: "bold"
                     },
@@ -182,18 +184,40 @@ export default function AppNavbar() {
           </Show>
 
           <Link href="/carrito" passHref>
-            <IconButton
-              aria-label="Ver carrito de compras"
-              variant="ghost"
-              color="brand.textMain"
-              rounded="full"
-              h="44px"
-              w="44px"
-              _hover={{ bg: "brand.border", color: "brand.accent" }}
-              _focus={{ ring: "2px", ringColor: "brand.accent", outline: "none" }}
-            >
-              <FaShoppingCart aria-hidden="true" />
-            </IconButton>
+            <Box position="relative">
+              <IconButton
+                aria-label="Ver carrito de compras"
+                variant="ghost"
+                color="brand.textMain"
+                rounded="full"
+                h="44px"
+                w="44px"
+                _hover={{ bg: "brand.border", color: "brand.accent" }}
+                _focus={{ ring: "2px", ringColor: "brand.accent", outline: "none" }}
+              >
+                <FaShoppingCart aria-hidden="true" />
+              </IconButton>
+              {totalItems > 0 && (
+                <Text
+                  position="absolute"
+                  top="-2px"
+                  right="-2px"
+                  bg="brand.accent"
+                  color="brand.bgMain" // Asegúrate que sea un color que contraste bien con tu brand.accent
+                  fontWeight="black"   // Esto le da el grosor de negrita 
+                  fontSize="10px"      // Tamaño pequeño y sutil
+                  borderRadius="full"
+                  w="18px"             
+                  h="18px"             // Alto fijo igual al ancho para que sea un círculo perfecto
+                  display="flex"
+                  alignItems="center"
+                  justifyContent="center"
+                  pointerEvents="none" // Para que no bloquee los clics sobre el botón
+                >
+                  {totalItems}
+                </Text>
+              )}
+            </Box>
           </Link>
 
         </HStack>
