@@ -6,4 +6,5 @@ export const brandColors = {
   border: "#21262D",
   textMain: "#E6EDF3",
   textMuted: "#8B949E",
+  danger: "#F85149",
 }

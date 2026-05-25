@@ -12,6 +12,7 @@ const customConfig = defineConfig({
           border: { value: brandColors.border },
           textMain: { value: brandColors.textMain },
           textMuted: { value: brandColors.textMuted },
+          danger: { value: brandColors.danger }
         },
       },
     },
