@@ -38,7 +38,7 @@ export default function DetalleProducto() {
                     <VStack gap={4}>
                         <Spinner color="brand.accent" size="xl" borderWidth="4px" />
                         <Text color="brand.accent" fontWeight="bold" letterSpacing="widest">
-                            CARGANDO PRODUCTO...
+                            CARGANDO PRODUCTOS...
                         </Text>
                     </VStack>
                 </Center>
@@ -106,11 +106,8 @@ export default function DetalleProducto() {
                         />
                     </Box>
 
-                    {/* DATOS */} {/*  TODO*/}
+                    {/* DATOS */}
                     <VStack align="flex-start" gap={4} flex={1}>
-                        {/* <Badge variant="outline" colorPalette="cyan">
-              {producto.marca?.toUpperCase() || 'GENERIC'}
-            </Badge> */}
                         <Badge
                             bg="brand.accent"
                             color="brand.bgMain"
@@ -165,22 +162,6 @@ export default function DetalleProducto() {
                                 </Text>
                             </Text>
                         )}
-
-                        {/* BOTON AGREGAR AL CARRITO */}
-                        {/* <Button
-                            bg={colors.accent}
-                            color={colors.bgMain}
-                            w="full"
-                            fontWeight="bold"
-                            size="lg"
-                            mt={2}
-                            disabled={producto.stock === 0}
-                            aria-label={`Agregar ${producto.nombre} al carrito`}
-                            _hover={{ bg: 'white', transform: 'scale(1.02)' }}
-                        >
-                            <FaShoppingCart />
-                            <Text ml={2}>Agregar al carrito</Text>
-                        </Button> */} {/*  TODO*/}
                         <Button
                             bg="brand.accent"
                             color="brand.bgMain"

@@ -11,7 +11,7 @@ import { getProducts } from '@/services/productService'
 import AppNavbar from '@/components/AppNavbar'
 import Pagination from '@/components/Pagination'
 import { AddToCartButton } from '@/components/ui/AddToCartButton'
-import { Producto } from '@/types/producto'
+import { Product,  ProductSummary } from '@/types/producto'
 
 function HydrationLoader() {
   return <div style={{ backgroundColor: "#0D1117", minHeight: "100vh" }} />
@@ -20,7 +20,7 @@ function HydrationLoader() {
 export default function ListadoProductos() {
   const [mounted, setMounted] = useState(false)
   // 2. TIPADO EXPLÍCITO DE LOS PRODUCTOS
-  const [data, setData] = useState<{ items: Producto[], total: number }>({ items: [], total: 0 });
+  const [data, setData] = useState<{ items: ProductSummary[], total: number }>({ items: [], total: 0 });
   const [loading, setLoading] = useState(false);
   const [offset, setOffset] = useState(0);
   const limit = 20;
@@ -29,7 +29,7 @@ export default function ListadoProductos() {
     const cargarDatos = async () => {
       setLoading(true);
       try {
-        const res = await getProducts({ offset, limit });
+        const res = await getProducts({ offset, limit, name: '', brand: '', hasStock: true, seller:'' });
         if (res && res.items) {
           setData(res);
         } else {
