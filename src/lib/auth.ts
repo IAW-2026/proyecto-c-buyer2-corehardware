@@ -1,4 +1,3 @@
-import { NextResponse } from 'next/server';
 
 export function validateApiKey(req: Request) {
   const apiKey = req.headers.get('x-api-key');
