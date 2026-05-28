@@ -6,7 +6,7 @@ import { FaUser } from 'react-icons/fa'
 
 export default function AuthButton() {
     return (
-        <SignInButton mode="modal">
+        <SignInButton mode="redirect">
             <IconButton
                 aria-label="Iniciar sesión"
                 variant="ghost"
