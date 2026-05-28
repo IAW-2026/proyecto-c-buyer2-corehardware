@@ -1,0 +1,87 @@
+import { NextRequest, NextResponse } from 'next/server'
+import { auth, currentUser } from '@clerk/nextjs/server'
+import { prisma } from '@/lib/prisma'
+import { z } from 'zod'
+
+const perfilSchema = z.object({
+  nombre: z.string().min(2, 'Nombre inválido'),
+  apellido: z.string().min(2, 'Apellido inválido'),
+  dni: z.string().min(7, 'DNI inválido').max(8, 'DNI inválido'),
+  cuilCuit: z.string().min(11, 'CUIL/CUIT inválido').max(13, 'CUIL/CUIT inválido'),
+  celular: z.string().min(8, 'Celular inválido'),
+  direccion: z.string().min(5, 'Dirección inválida'),
+  fechaNacimiento: z.string().refine((v) => !isNaN(Date.parse(v)), 'Fecha inválida'),
+  nacionalidad: z.string().min(2, 'Nacionalidad inválida'),
+  sexo: z.string().optional(),
+  condicionIva: z.enum([
+    'Consumidor Final',
+    'Responsable Inscripto',
+    'Monotributista',
+    'Exento',
+  ]),
+})
+
+export async function PUT(req: NextRequest) {
+  const { userId } = await auth()
+
+  if (!userId) {
+    return NextResponse.json({ error: 'No autenticado' }, { status: 401 })
+  }
+
+  const body = await req.json()
+  const result = perfilSchema.safeParse(body)
+
+  if (!result.success) {
+    return NextResponse.json(
+      { error: 'Datos inválidos', detalles: result.error.flatten().fieldErrors },
+      { status: 400 }
+    )
+  }
+
+  const { nombre, apellido, dni, cuilCuit, celular, direccion, fechaNacimiento, nacionalidad, sexo, condicionIva } =
+    result.data
+
+  // Verificar unicidad del DNI
+  const dniExistente = await prisma.comprador.findFirst({
+    where: { dni, NOT: { clerkUserId: userId } },
+  })
+  if (dniExistente) {
+    return NextResponse.json({ error: 'El DNI ya está registrado' }, { status: 409 })
+  }
+
+  // Obtener datos de Clerk para el caso de creación
+  const clerkUser = await currentUser()
+
+  const comprador = await prisma.comprador.upsert({
+    where: { clerkUserId: userId },
+    update: {
+      nombre,
+      apellido,
+      dni,
+      cuilCuit,
+      celular,
+      direccion,
+      fechaNacimiento: new Date(fechaNacimiento),
+      nacionalidad,
+      sexo: sexo ?? null,
+      condicionIva,
+    },
+    create: {
+      clerkUserId: userId,
+      mail: clerkUser?.emailAddresses[0]?.emailAddress ?? '',
+      nombre,
+      apellido,
+      dni,
+      cuilCuit,
+      celular,
+      direccion,
+      fechaNacimiento: new Date(fechaNacimiento),
+      nacionalidad,
+      sexo: sexo ?? null,
+      condicionIva,
+      isDeleted: false,
+    },
+  })
+
+  return NextResponse.json({ ok: true, compradorId: comprador.id })
+}
