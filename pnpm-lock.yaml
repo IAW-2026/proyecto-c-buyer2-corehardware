@@ -23,6 +23,9 @@ importers:
       '@emotion/styled':
         specifier: ^11.14.1
         version: 11.14.1(@emotion/react@11.14.0(@types/react@19.2.14)(react@19.2.4))(@types/react@19.2.14)(react@19.2.4)
+      '@neondatabase/serverless':
+        specifier: ^1.1.0
+        version: 1.1.0
       '@prisma/adapter-neon':
         specifier: ^7.8.0
         version: 7.8.0
@@ -47,6 +50,12 @@ importers:
       react-icons:
         specifier: ^5.6.0
         version: 5.6.0(react@19.2.4)
+      svix:
+        specifier: ^1.94.0
+        version: 1.94.0
+      zod:
+        specifier: ^4.4.3
+        version: 4.4.3
     devDependencies:
       '@prisma/config':
         specifier: ^7.8.0
@@ -2669,6 +2678,9 @@ packages:
   supports-preserve-symlinks-flag@1.0.0:
     resolution: {integrity: sha512-ot0WnXS9fgdkgIcePe6RHNk1WA8+muPa6cSjeR3V8K27q9BB1rTE3R1p7Hv0z1ZyAc8s6Vvv8DIyWf681MAt0w==}
     engines: {node: '>= 0.4'}
+
+  svix@1.94.0:
+    resolution: {integrity: sha512-FuP5nJez1P/SeK+4zOBI8RrNhtrzMTBSvwuD4yGGsn+Af2yQazid6OwPu3fpZpMifOJxrJua0su/dYB5fe4v9Q==}
 
   tinyglobby@0.2.16:
     resolution: {integrity: sha512-pn99VhoACYR8nFHhxqix+uvsbXineAasWm5ojXoN8xEwK5Kd3/TrhNn1wByuD52UxWRLy8pu+kRMniEi6Eq9Zg==}
@@ -6016,6 +6028,10 @@ snapshots:
       has-flag: 4.0.0
 
   supports-preserve-symlinks-flag@1.0.0: {}
+
+  svix@1.94.0:
+    dependencies:
+      standardwebhooks: 1.0.0
 
   tinyglobby@0.2.16:
     dependencies:
