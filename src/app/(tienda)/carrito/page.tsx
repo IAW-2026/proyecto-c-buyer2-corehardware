@@ -20,6 +20,7 @@ import {
 } from '@chakra-ui/react'
 import { AddIcon, MinusIcon, DeleteIcon } from '@chakra-ui/icons'
 import { toaster } from "@/components/ui/toaster"
+import { useComprador } from '@/app/hooks/useComprador'
 
 export default function CarritoPage() {
   const router = useRouter()
@@ -27,6 +28,9 @@ export default function CarritoPage() {
   // Autenticación con Clerk
   const { isSignedIn, isLoaded } = useAuth()
   const { session } = useSession()
+
+ // Hook personalizado para obtener datos del comprador 
+  const { comprador } = useComprador() 
 
   // Datos del Carrito Global (Asegúrate de que coincida con tus nombres del CartContext)
   const { items, total, incrementarCantidad, decrementarCantidad, limpiarCarrito, remover, costoEnvio, subtotalProductos } = useCart()
@@ -74,7 +78,7 @@ export default function CarritoPage() {
       const pedidoPayload = {
         id: Math.floor(Math.random() * 100000), // ID aleatorio temporal para el pedido
         fecha: new Date().toISOString().split('T')[0], // Formato YYYY-MM-DD
-        compradorId: 1, // ⚠️ Reemplazar luego por tu ID real de comprador de tu base de datos
+        compradorId: comprador?.id ?? 0, // Si el comprador existe entonces lo obtengo sino es cero.
         vendedorId: items[0]?.vendedorId || 1, // Tomamos el vendedor del primer ítem
         productos: productosAplanados, // El array de números planos
         monto: total // El total de dinero calculado por el contexto
@@ -87,7 +91,7 @@ export default function CarritoPage() {
 
       toaster.create({
         title: '¡Pedido Procesado!',
-        description: 'Conectando con la pasarela de pagos de MercadoPago...',
+        description: 'Inciando compra...',
         type: 'success',
       })
 
@@ -269,7 +273,7 @@ export default function CarritoPage() {
               size="lg"
               onClick={handleCheckout}
               loading={isProcessing}
-              loadingText="Conectando pasarela..."
+              loadingText="Iniciando compra..."
               _hover={{ bg: "blue.400", transform: "translateY(-2px)" }}
               _active={{ transform: "translateY(0)" }}
               transition="all 0.2s"
