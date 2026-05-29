@@ -8,6 +8,7 @@ import { FaArrowLeft, FaShoppingCart, FaShieldAlt, FaBox } from 'react-icons/fa'
 import { useRouter, useParams } from 'next/navigation'
 import { getProductById } from '@/services/productService'
 import AppNavbar from '@/components/AppNavbar'
+import { BackButton } from '@/components/ui/BackButton'
 
 export default function DetalleProducto() {
     const router = useRouter()
@@ -37,7 +38,7 @@ export default function DetalleProducto() {
                     <VStack gap={4}>
                         <Spinner color="brand.accent" size="xl" borderWidth="4px" />
                         <Text color="brand.accent" fontWeight="bold" letterSpacing="widest">
-                            CARGANDO PRODUCTO...
+                            CARGANDO PRODUCTOS...
                         </Text>
                     </VStack>
                 </Center>
@@ -75,20 +76,7 @@ export default function DetalleProducto() {
         <Box bg="brand.bgMain" minH="100vh" color="brand.textMain">
             <AppNavbar />
 
-            {/* BOTON VOLVER */}
-            <Box px={{ base: 4, md: 8 }} pt={6}>
-                <Button
-                    variant="ghost"
-                    color="brand.accent"
-                    onClick={() => router.back()}
-                    aria-label="Volver al listado de productos"
-                    _hover={{ bg: "brand.bgCard" }}
-                    px={2}
-                >
-                    <FaArrowLeft />
-                    <Text ml={2}>Volver</Text>
-                </Button>
-            </Box>
+            <BackButton />
 
             {/* CONTENIDO PRINCIPAL */}
             <Box px={{ base: 4, md: 8 }} py={6}>
@@ -118,11 +106,8 @@ export default function DetalleProducto() {
                         />
                     </Box>
 
-                    {/* DATOS */} {/*  TODO*/} 
+                    {/* DATOS */}
                     <VStack align="flex-start" gap={4} flex={1}>
-                        {/* <Badge variant="outline" colorPalette="cyan">
-              {producto.marca?.toUpperCase() || 'GENERIC'}
-            </Badge> */} 
                         <Badge
                             bg="brand.accent"
                             color="brand.bgMain"
@@ -177,22 +162,6 @@ export default function DetalleProducto() {
                                 </Text>
                             </Text>
                         )}
-
-                        {/* BOTON AGREGAR AL CARRITO */}
-                        {/* <Button
-                            bg={colors.accent}
-                            color={colors.bgMain}
-                            w="full"
-                            fontWeight="bold"
-                            size="lg"
-                            mt={2}
-                            disabled={producto.stock === 0}
-                            aria-label={`Agregar ${producto.nombre} al carrito`}
-                            _hover={{ bg: 'white', transform: 'scale(1.02)' }}
-                        >
-                            <FaShoppingCart />
-                            <Text ml={2}>Agregar al carrito</Text>
-                        </Button> */} {/*  TODO*/}
                         <Button
                             bg="brand.accent"
                             color="brand.bgMain"

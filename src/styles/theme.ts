@@ -1,16 +1,18 @@
 import { createSystem, defineConfig, defaultConfig } from "@chakra-ui/react"
+import { brandColors } from "./colors"
 
 const customConfig = defineConfig({
   theme: {
     tokens: {
       colors: {
         brand: {
-          bgMain: { value: "#0D1117" },
-          bgCard: { value: "#161B22" },
-          accent: { value: "#00D1FF" },
-          border: { value: "#21262D" },
-          textMain: { value: "#E6EDF3" },
-          textMuted: { value: "#8B949E" },
+          bgMain: { value: brandColors.bgMain },
+          bgCard: { value: brandColors.bgCard },
+          accent: { value: brandColors.accent },
+          border: { value: brandColors.border },
+          textMain: { value: brandColors.textMain },
+          textMuted: { value: brandColors.textMuted },
+          danger: { value: brandColors.danger }
         },
       },
     },

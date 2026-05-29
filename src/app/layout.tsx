@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Providers } from "./providers";
 import { ClerkProvider } from "@clerk/nextjs";
+import { CartProvider } from "@/context/CartContext"; 
+import { Toaster } from "@/components/ui/toaster"
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -10,10 +12,18 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <ClerkProvider>
+    <ClerkProvider
+      signInUrl="/sign-in"
+      signUpUrl="/sign-up"
+    >
       <html lang="es" suppressHydrationWarning>
         <body>
-          <Providers>{children}</Providers>
+          <Providers>
+            <CartProvider>
+              {children}
+              <Toaster />
+            </CartProvider>
+          </Providers>
         </body>
       </html>
     </ClerkProvider>

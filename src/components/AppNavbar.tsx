@@ -1,12 +1,16 @@
 'use client'
+
 import { useState } from 'react'
-import { Box, Flex, Heading, Text, HStack, Input, IconButton } from '@chakra-ui/react'
+import { Box, Flex, Heading, Text, HStack, Input, IconButton, Badge } from '@chakra-ui/react'
 import { FaSearch, FaUser, FaShoppingCart, FaTimes } from 'react-icons/fa'
 import { Show, UserButton } from '@clerk/nextjs'
 import Link from 'next/link'
+import AuthButton from '@/components/ui/AuthButton'
+import { useCart } from '@/context/CartContext'
 
 export default function AppNavbar() {
   const [searchOpen, setSearchOpen] = useState(false)
+  const { totalItems } = useCart()
 
   return (
     <Box
@@ -90,11 +94,10 @@ export default function AppNavbar() {
         </Box>
 
         {/* ÍCONOS */}
-        <HStack gap={{ base: 1, md: 2 }} flexShrink={0}>
+        <HStack gap={{ base: 1, md: 2 }} flexShrink={0} align="center">
 
           {/* Lupa / Cruz — solo mobile, alterna barra de búsqueda */}
           {searchOpen ? (
-            /* MODIFICACIÓN: Cuando está abierto, renderizamos la cruz limpia directamente como elemento interactivo */
             <Box
               as="button"
               role="button"
@@ -108,7 +111,6 @@ export default function AppNavbar() {
               w="44px"
               color="brand.accent"
               cursor="pointer"
-              /* Evitamos cualquier tipo de fondo o borde azul nativo */
               outline="none"
               _focus={{ outline: "none" }}
               _active={{ bg: "transparent" }}
@@ -116,7 +118,6 @@ export default function AppNavbar() {
               <FaTimes aria-hidden="true" size={24} />
             </Box>
           ) : (
-            /* Cuando está cerrado, se muestra el botón de la lupa estándar */
             <IconButton
               aria-label="Abrir barra de búsqueda"
               aria-expanded="false"
@@ -136,9 +137,56 @@ export default function AppNavbar() {
           )}
 
           <Show when="signed-out">
-            <Link href="/sign-in" passHref>
+            <AuthButton />
+          </Show>
+
+          <Show when="signed-in">
+            {/* MODIFICADO: Ajustamos el contenedor para envolver al botón perfectamente sin desvíos */}
+            <Flex
+              align="center"
+              justify="center"
+              borderWidth="2px"
+              borderStyle="solid"
+              borderColor="brand.accent"
+              borderRadius="full"
+              h="36px"
+              w="36px"
+              overflow="hidden"
+            >
+              <UserButton
+                appearance={{
+                  elements: {
+                    // Fuerza al disparador de Clerk a heredar el tamaño redondo exacto de tu contenedor
+                    userButtonTrigger: {
+                      width: "100%",
+                      height: "100%",
+                      padding: 0,
+                      margin: 0,
+                      outline: "none",
+                      boxShadow: "none"
+                    },
+                    // Cambia el fondo violeta inicial de Clerk por un tono oscuro neutro o el acento de tu marca
+                    userButtonAvatarFallback: {
+                      backgroundColor: "#00d1ff",
+                      color: "#0d1117",
+                      fontWeight: "bold"
+                    },
+                    // Remueve cajas azules nativas al hacer focus
+                    userButtonAvatarBox: {
+                      width: "100%",
+                      height: "100%",
+                      borderRadius: "full"
+                    }
+                  }
+                }}
+              />
+            </Flex>
+          </Show>
+
+          <Link href="/carrito" passHref>
+            <Box position="relative">
               <IconButton
-                aria-label="Iniciar sesión"
+                aria-label="Ver carrito de compras"
                 variant="ghost"
                 color="brand.textMain"
                 rounded="full"
@@ -147,42 +195,35 @@ export default function AppNavbar() {
                 _hover={{ bg: "brand.border", color: "brand.accent" }}
                 _focus={{ ring: "2px", ringColor: "brand.accent", outline: "none" }}
               >
-                <FaUser aria-hidden="true" />
+                <FaShoppingCart aria-hidden="true" />
               </IconButton>
-            </Link>
-          </Show>
-
-          <Show when="signed-in">
-            <Box
-              border="2px solid"
-              borderColor="brand.accent"
-              borderRadius="full"
-              p="2px"
-              _focusWithin={{ ring: "2px", ringColor: "brand.accent" }}
-            >
-              <UserButton />
+              {totalItems > 0 && (
+                <Text
+                  position="absolute"
+                  top="-2px"
+                  right="-2px"
+                  bg="brand.accent"
+                  color="brand.bgMain" // Asegúrate que sea un color que contraste bien con tu brand.accent
+                  fontWeight="black"   // Esto le da el grosor de negrita 
+                  fontSize="10px"      // Tamaño pequeño y sutil
+                  borderRadius="full"
+                  w="18px"             
+                  h="18px"             // Alto fijo igual al ancho para que sea un círculo perfecto
+                  display="flex"
+                  alignItems="center"
+                  justifyContent="center"
+                  pointerEvents="none" // Para que no bloquee los clics sobre el botón
+                >
+                  {totalItems}
+                </Text>
+              )}
             </Box>
-          </Show>
-
-          <Link href="/carrito" passHref>
-            <IconButton
-              aria-label="Ver carrito de compras"
-              variant="ghost"
-              color="brand.textMain"
-              rounded="full"
-              h="44px"
-              w="44px"
-              _hover={{ bg: "brand.border", color: "brand.accent" }}
-              _focus={{ ring: "2px", ringColor: "brand.accent", outline: "none" }}
-            >
-              <FaShoppingCart aria-hidden="true" />
-            </IconButton>
           </Link>
 
         </HStack>
       </Flex>
 
-      {/* BARRA DE BÚSQUEDA MOBILE — se expande al hacer click en la lupa */}
+      {/* BARRA DE BÚSQUEDA MOBILE */}
       {searchOpen && (
         <Box
           as="search"

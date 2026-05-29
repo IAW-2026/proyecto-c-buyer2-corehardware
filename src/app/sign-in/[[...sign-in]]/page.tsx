@@ -1,25 +1,23 @@
 'use client'
+import { Flex, Box } from '@chakra-ui/react'
 import { SignIn } from '@clerk/nextjs'
+import { brandColors } from '@/styles/colors'
 
 export default function SignInPage() {
   return (
-    <div style={{
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'center',
-      minHeight: '100vh',
-      backgroundColor: '#0D1117'
-    }}>
-      <SignIn appearance={{
-        variables: {
-          colorPrimary: '#00D1FF',
-          colorBackground: '#161B22',
-          colorText: '#E6EDF3',
-          colorTextSecondary: '#8B949E',
-          colorInputBackground: '#0D1117',
-          colorInputText: '#E6EDF3',
-        }
-      }} />
-    </div>
+    <Flex justify="center" align="center" minH="100vh" bg="brand.bgMain">
+      <Box borderRadius="md">
+        <SignIn appearance={{
+          variables: {
+            colorPrimary: brandColors.accent,
+            colorBackground: brandColors.bgCard,
+            colorText: brandColors.textMain,
+            colorTextSecondary: brandColors.textMuted,
+            colorInputBackground: brandColors.bgMain,
+            colorInputText: brandColors.textMain,
+          }
+        }} />
+      </Box>
+    </Flex>
   )
 }

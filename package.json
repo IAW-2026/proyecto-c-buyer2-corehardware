@@ -11,6 +11,7 @@
     "seed:db": "ts-node --skip-project -O \"{\\\"module\\\":\\\"commonjs\\\",\\\"target\\\":\\\"es2022\\\"}\" prisma/seed.ts"
   },
   "dependencies": {
+    "@chakra-ui/icons": "^2.2.4",
     "@chakra-ui/react": "^3.35.0",
     "@clerk/nextjs": "^7.3.4",
     "@emotion/react": "^11.14.0",
@@ -23,7 +24,9 @@
     "next-themes": "^0.4.6",
     "react": "19.2.4",
     "react-dom": "19.2.4",
-    "react-icons": "^5.6.0"
+    "react-icons": "^5.6.0",
+    "svix": "^1.94.0",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "@prisma/config": "^7.8.0",
