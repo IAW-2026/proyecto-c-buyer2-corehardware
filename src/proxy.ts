@@ -16,7 +16,6 @@ const isAdminRoute = createRouteMatcher(['/dashboard(.*)'])
 
 // Rutas que requieren login + perfil completo
 const isProtectedRoute = createRouteMatcher([
-  '/checkout(.*)',
   '/mis-pedidos(.*)',
   '/perfil(.*)',
 ])
