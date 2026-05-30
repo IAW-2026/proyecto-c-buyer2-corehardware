@@ -5,7 +5,6 @@
 
 generator client {
   provider = "prisma-client-js"
-  previewFeatures = ["driverAdapters"]
 }
 
 datasource db {
@@ -28,6 +27,7 @@ model Comprador {
   clerkUserId     String   @unique // UserID (Clerk) 
   isDeleted       Boolean  @default(false)
   pedidos         Pedido[]
+  carrito         Carrito?
 }
 
 model Pedido {
@@ -40,4 +40,24 @@ model Pedido {
   monto       Float
   estado      String
   envioId     Int?     // Referencia a la Shipping App
+}
+
+model Carrito {
+  id          Int           @id @default(autoincrement())
+  compradorId Int           @unique  // un solo carrito activo por comprador
+  comprador   Comprador     @relation(fields: [compradorId], references: [id])
+  items       CarritoItem[]
+  creadoEn    DateTime      @default(now())
+  actualizadoEn DateTime    @updatedAt
+}
+
+model CarritoItem {
+  id         Int     @id @default(autoincrement())
+  carritoId  Int
+  carrito    Carrito @relation(fields: [carritoId], references: [id], onDelete: Cascade)
+  productoId Int     // ID del producto en Seller App
+  nombre     String  // Desnormalizado: copiamos el nombre para no depender de Seller App
+  precio     Float   // Desnormalizado: precio al momento de agregar
+  imagen     String?
+  cantidad   Int     @default(1)
 }
