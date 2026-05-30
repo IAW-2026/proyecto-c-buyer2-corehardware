@@ -6,7 +6,7 @@ import {
 } from '@chakra-ui/react'
 import { FaArrowLeft, FaShoppingCart, FaShieldAlt, FaBox } from 'react-icons/fa'
 import { useRouter, useParams } from 'next/navigation'
-import { getProductById } from '@/services/productService'
+import { getProductById } from '@/services/sellerService'
 import AppNavbar from '@/components/AppNavbar'
 import { BackButton } from '@/components/ui/BackButton'
 

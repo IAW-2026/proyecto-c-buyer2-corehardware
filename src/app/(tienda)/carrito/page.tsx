@@ -20,7 +20,6 @@ import {
 } from '@chakra-ui/react'
 import { AddIcon, MinusIcon, DeleteIcon } from '@chakra-ui/icons'
 import { toaster } from "@/components/ui/toaster"
-import { useComprador } from '@/app/hooks/useComprador'
 
 export default function CarritoPage() {
   const router = useRouter()
@@ -28,9 +27,6 @@ export default function CarritoPage() {
   // Autenticación con Clerk
   const { isSignedIn, isLoaded } = useAuth()
   const { session } = useSession()
-
- // Hook personalizado para obtener datos del comprador 
-  const { comprador } = useComprador() 
 
   // Datos del Carrito Global (Asegúrate de que coincida con tus nombres del CartContext)
   const { items, total, incrementarCantidad, decrementarCantidad, limpiarCarrito, remover, costoEnvio, subtotalProductos } = useCart()
@@ -73,12 +69,9 @@ export default function CarritoPage() {
         Array(item.cantidad || 1).fill(item.id)
       )
 
-      //TODO CORREGIR DEBAJO EL NUMERO DE COMPRADOR
       // 4. Armar el JSON del pedido idéntico al diseño acordado
       const pedidoPayload = {
-        id: Math.floor(Math.random() * 100000), // ID aleatorio temporal para el pedido
-        fecha: new Date().toISOString().split('T')[0], // Formato YYYY-MM-DD
-        compradorId: comprador?.id ?? 0, // Si el comprador existe entonces lo obtengo sino es cero.
+        fecha: new Date().toISOString(), // Formato YYYY-MM-DDTHH:mm:ss.sssZ
         vendedorId: items[0]?.vendedorId || 1, // Tomamos el vendedor del primer ítem
         productos: productosAplanados, // El array de números planos
         monto: total // El total de dinero calculado por el contexto
