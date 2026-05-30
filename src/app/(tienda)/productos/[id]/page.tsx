@@ -6,7 +6,7 @@ import {
 } from '@chakra-ui/react'
 import { FaArrowLeft, FaShoppingCart, FaShieldAlt, FaBox } from 'react-icons/fa'
 import { useRouter, useParams } from 'next/navigation'
-import { getProductById } from '@/services/sellerService'
+import { SellerService } from '@/services/sellerService'
 import AppNavbar from '@/components/AppNavbar'
 import { BackButton } from '@/components/ui/BackButton'
 
@@ -22,7 +22,7 @@ export default function DetalleProducto() {
     useEffect(() => {
         const cargar = async () => {
             setLoading(true)
-            const data = await getProductById(id)
+            const data = await SellerService.getProductById(id)
             if (!data) setNotFound(true)
             else setProducto(data)
             setLoading(false)

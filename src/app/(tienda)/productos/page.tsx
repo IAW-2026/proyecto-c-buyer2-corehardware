@@ -7,7 +7,7 @@ import {
 } from '@chakra-ui/react'
 import { FaSearch } from 'react-icons/fa'
 import Link from 'next/link'
-import { getProducts } from '@/services/sellerService'
+import { SellerService } from '@/services/sellerService'
 import AppNavbar from '@/components/AppNavbar'
 import Pagination from '@/components/Pagination'
 import { AddToCartButton } from '@/components/ui/AddToCartButton'
@@ -23,7 +23,7 @@ export default function ListadoProductos() {
     const cargarDatos = async () => {
       setLoading(true)
       try {
-        const res = await getProducts({ offset, limit, name: '', brand: '', hasStock: true, seller: '' })
+        const res = await SellerService.getProducts({ offset, limit, name: '', brand: '', hasStock: true, seller: '' })
         setData(res?.items ? res : { items: [], total: 0 })
       } catch (error) {
         console.error("Error cargando productos:", error)

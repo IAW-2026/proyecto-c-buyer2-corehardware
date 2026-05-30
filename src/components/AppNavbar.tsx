@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { Box, Flex, Heading, Text, HStack, Input, IconButton, Badge } from '@chakra-ui/react'
-import { FaSearch, FaUser, FaShoppingCart, FaTimes } from 'react-icons/fa'
+import { FaSearch, FaUser, FaShoppingCart, FaTimes, FaBox } from 'react-icons/fa'
 import { Show, UserButton } from '@clerk/nextjs'
 import Link from 'next/link'
 import AuthButton from '@/components/ui/AuthButton'
@@ -179,7 +179,21 @@ export default function AppNavbar() {
                     }
                   }
                 }}
-              />
+              >
+                <UserButton.MenuItems>
+                  <UserButton.Link
+                    label="Mis pedidos"
+                    labelIcon={<FaBox />}
+                    href="/pedidos"
+                  />
+                  <UserButton.Link
+                    label="Mi perfil"
+                    labelIcon={<FaUser />}
+                    href="/perfil"
+                  />
+                </UserButton.MenuItems>
+              </UserButton>
+
             </Flex>
           </Show>
 
@@ -207,7 +221,7 @@ export default function AppNavbar() {
                   fontWeight="black"   // Esto le da el grosor de negrita 
                   fontSize="10px"      // Tamaño pequeño y sutil
                   borderRadius="full"
-                  w="18px"             
+                  w="18px"
                   h="18px"             // Alto fijo igual al ancho para que sea un círculo perfecto
                   display="flex"
                   alignItems="center"
