@@ -2,57 +2,45 @@
 
 import { useState, useEffect } from 'react'
 import {
-  Box, Flex, Image, SimpleGrid, Text,
+  Box, Image, SimpleGrid, Text,
   Button, Heading, Badge, VStack, Spinner, Center
 } from '@chakra-ui/react'
 import { FaSearch } from 'react-icons/fa'
 import Link from 'next/link'
-import { getProducts } from '@/services/productService'
+import { getProducts } from '@/services/sellerService'
 import AppNavbar from '@/components/AppNavbar'
 import Pagination from '@/components/Pagination'
 import { AddToCartButton } from '@/components/ui/AddToCartButton'
-import { Product,  ProductSummary } from '@/types/producto'
-
-function HydrationLoader() {
-  return <div style={{ backgroundColor: "#0D1117", minHeight: "100vh" }} />
-}
+import { ProductSummary } from '@/types/producto'
 
 export default function ListadoProductos() {
-  const [mounted, setMounted] = useState(false)
-  // 2. TIPADO EXPLÍCITO DE LOS PRODUCTOS
-  const [data, setData] = useState<{ items: ProductSummary[], total: number }>({ items: [], total: 0 });
-  const [loading, setLoading] = useState(false);
-  const [offset, setOffset] = useState(0);
-  const limit = 20;
+  const [data, setData] = useState<{ items: ProductSummary[], total: number }>({ items: [], total: 0 })
+  const [loading, setLoading] = useState(true)
+  const [offset, setOffset] = useState(0)
+  const limit = 20
 
   useEffect(() => {
     const cargarDatos = async () => {
-      setLoading(true);
+      setLoading(true)
       try {
-        const res = await getProducts({ offset, limit, name: '', brand: '', hasStock: true, seller:'' });
-        if (res && res.items) {
-          setData(res);
-        } else {
-          setData({ items: [], total: 0 });
-        }
+        const res = await getProducts({ offset, limit, name: '', brand: '', hasStock: true, seller: '' })
+        setData(res?.items ? res : { items: [], total: 0 })
       } catch (error) {
-        console.error("Error cargando productos:", error);
-        setData({ items: [], total: 0 });
+        console.error("Error cargando productos:", error)
+        setData({ items: [], total: 0 })
       } finally {
-        setLoading(false);
-        setMounted(true);
+        setLoading(false)
       }
-    };
-    cargarDatos();
-  }, [offset, limit]);
+    }
+    cargarDatos()
+  }, [offset, limit])
 
   const handlePageChange = (newOffset: number) => {
-    setOffset(newOffset);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
+    setOffset(newOffset)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
 
   if (loading) {
-    if (!mounted) return <HydrationLoader />
     return (
       <Box bg="brand.bgMain" minH="100vh">
         <AppNavbar />
@@ -63,11 +51,10 @@ export default function ListadoProductos() {
           </VStack>
         </Center>
       </Box>
-    );
+    )
   }
 
   if (data.items?.length === 0) {
-    if (!mounted) return <HydrationLoader />
     return (
       <Box bg="brand.bgMain" minH="100vh">
         <AppNavbar />
@@ -85,10 +72,8 @@ export default function ListadoProductos() {
           </VStack>
         </Center>
       </Box>
-    );
+    )
   }
-
-  if (!mounted) return <HydrationLoader />
 
   return (
     <Box bg="brand.bgMain" minH="100vh" color="brand.textMain">
@@ -143,8 +128,7 @@ export default function ListadoProductos() {
                   </Text>
                 </Box>
               </Link>
-              
-              {/* 3. INTEGRACIÓN DEL BOTÓN DE CARRITO ACCESIBLE */}
+
               <Box p={4} pt={0}>
                 <AddToCartButton producto={prod} />
               </Box>

@@ -9,6 +9,8 @@ const isPublicRoute = createRouteMatcher([
   '/productos(.*)',
   '/carrito(.*)',
   '/api/webhooks(.*)',
+  '/api/orders(.*)',
+  '/api/buyers(.*)', 
 ])
 
 // Rutas del panel admin
