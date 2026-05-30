@@ -21,6 +21,39 @@ const perfilSchema = z.object({
   ]),
 })
 
+// ── GET — obtener datos del comprador logueado ─────────────────────────────
+export async function GET() {
+  const { userId } = await auth()
+
+  if (!userId) {
+    return NextResponse.json({ error: 'No autenticado' }, { status: 401 })
+  }
+
+  const comprador = await prisma.comprador.findUnique({
+    where: { clerkUserId: userId },
+  })
+
+  if (!comprador || comprador.isDeleted) {
+    return NextResponse.json({ error: 'Perfil no encontrado' }, { status: 404 })
+  }
+
+  return NextResponse.json({
+    id: comprador.id,
+    nombre: comprador.nombre,
+    apellido: comprador.apellido,
+    dni: comprador.dni,
+    cuilCuit: comprador.cuilCuit,
+    mail: comprador.mail,
+    celular: comprador.celular,
+    direccion: comprador.direccion,
+    fechaNacimiento: comprador.fechaNacimiento.toISOString().split('T')[0],
+    nacionalidad: comprador.nacionalidad,
+    sexo: comprador.sexo ?? '',
+    condicionIva: comprador.condicionIva,
+  })
+}
+
+// ── PUT — actualizar datos del comprador ───────────────────────────────────
 export async function PUT(req: NextRequest) {
   const { userId } = await auth()
 
@@ -41,7 +74,6 @@ export async function PUT(req: NextRequest) {
   const { nombre, apellido, dni, cuilCuit, celular, direccion, fechaNacimiento, nacionalidad, sexo, condicionIva } =
     result.data
 
-  // Verificar unicidad del DNI
   const dniExistente = await prisma.comprador.findFirst({
     where: { dni, NOT: { clerkUserId: userId } },
   })
@@ -49,39 +81,48 @@ export async function PUT(req: NextRequest) {
     return NextResponse.json({ error: 'El DNI ya está registrado' }, { status: 409 })
   }
 
-  // Obtener datos de Clerk para el caso de creación
   const clerkUser = await currentUser()
 
   const comprador = await prisma.comprador.upsert({
     where: { clerkUserId: userId },
     update: {
-      nombre,
-      apellido,
-      dni,
-      cuilCuit,
-      celular,
-      direccion,
+      nombre, apellido, dni, cuilCuit, celular, direccion,
       fechaNacimiento: new Date(fechaNacimiento),
-      nacionalidad,
-      sexo: sexo ?? null,
-      condicionIva,
+      nacionalidad, sexo: sexo ?? null, condicionIva,
     },
     create: {
       clerkUserId: userId,
       mail: clerkUser?.emailAddresses[0]?.emailAddress ?? '',
-      nombre,
-      apellido,
-      dni,
-      cuilCuit,
-      celular,
-      direccion,
+      nombre, apellido, dni, cuilCuit, celular, direccion,
       fechaNacimiento: new Date(fechaNacimiento),
-      nacionalidad,
-      sexo: sexo ?? null,
-      condicionIva,
+      nacionalidad, sexo: sexo ?? null, condicionIva,
       isDeleted: false,
     },
   })
 
   return NextResponse.json({ ok: true, compradorId: comprador.id })
+}
+
+// ── DELETE — soft delete del comprador ────────────────────────────────────
+export async function DELETE() {
+  const { userId } = await auth()
+
+  if (!userId) {
+    return NextResponse.json({ error: 'No autenticado' }, { status: 401 })
+  }
+
+  const comprador = await prisma.comprador.findUnique({
+    where: { clerkUserId: userId },
+  })
+
+  if (!comprador || comprador.isDeleted) {
+    return NextResponse.json({ error: 'Perfil no encontrado' }, { status: 404 })
+  }
+
+  await prisma.comprador.update({
+    where: { clerkUserId: userId },
+    data: { isDeleted: true },
+  })
+
+  return NextResponse.json({ ok: true })
 }
