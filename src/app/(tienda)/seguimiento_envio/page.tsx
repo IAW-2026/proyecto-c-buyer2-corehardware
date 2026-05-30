@@ -16,6 +16,7 @@ import AppNavbar from '@/components/AppNavbar'
 import { BackButton } from '@/components/ui/BackButton'
 import { ShipmentService, Shipment } from '@/services/shipmentService'
 import { Pedido, EstadoPedido } from '@/types/pedido'
+import { Suspense } from 'react'
 
 // ── Config de estados del envío ────────────────────────────────────────────
 
@@ -113,7 +114,7 @@ function BarraEnvio({ estado }: { estado: string }) {
 
 // ── Página principal ───────────────────────────────────────────────────────
 
-export default function SeguimientoEnvioPage() {
+function SeguimientoEnvioContent() {
   const { isSignedIn, isLoaded } = useAuth()
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -398,5 +399,17 @@ export default function SeguimientoEnvioPage() {
 
       </Container>
     </>
+  )
+}
+
+export default function SeguimientoEnvioPage() {
+  return (
+    <Suspense fallback={
+      <Flex justify="center" align="center" minH="60vh">
+        <Spinner color="brand.accent" size="lg" />
+      </Flex>
+    }>
+      <SeguimientoEnvioContent />
+    </Suspense>
   )
 }
