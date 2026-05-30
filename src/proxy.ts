@@ -11,6 +11,8 @@ const isPublicRoute = createRouteMatcher([
   '/api/webhooks(.*)',
   '/api/orders(.*)',
   '/api/buyers(.*)', 
+  '/api/seller(.*)',    
+  '/api/shipping(.*)', 
 ])
 
 // Rutas del panel admin
@@ -18,7 +20,8 @@ const isAdminRoute = createRouteMatcher(['/dashboard(.*)'])
 
 // Rutas que requieren login + perfil completo
 const isProtectedRoute = createRouteMatcher([
-  '/mis-pedidos(.*)',
+  '/pedidos(.*)',
+  '/seguimiento_envio(.*)',
   '/perfil(.*)',
 ])
 

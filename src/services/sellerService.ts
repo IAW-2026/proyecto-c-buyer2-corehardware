@@ -36,7 +36,15 @@ export interface GetProductsParams {
 // Helper de routing — igual patrón que paymentService
 // ─────────────────────────────────────────────
 function getSellerBaseUrl(): string {
-  return process.env.NEXT_PUBLIC_SELLER_API_URL ?? '/api/seller'
+  // Etapa 3: URL externa de seller
+  if (process.env.NEXT_PUBLIC_SELLER_API_URL) {
+    return process.env.NEXT_PUBLIC_SELLER_API_URL
+  }
+  // Etapa 2: API interna — funciona en local y en Vercel automáticamente
+  if (typeof window !== 'undefined') {
+    return `${window.location.origin}/api/seller`
+  }
+  return '/api/seller'
 }
 
 function getHeaders(): HeadersInit {
