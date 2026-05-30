@@ -1,4 +1,4 @@
-import { prisma } from '../src/db/db'
+import { prisma } from '../src/lib/prisma'
 
 async function main() {
   console.log('⏳ Iniciando el sembrado de datos (Seed) en Neon...')
