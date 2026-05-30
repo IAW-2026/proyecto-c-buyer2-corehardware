@@ -12,7 +12,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
     try {
         await prisma.pedido.update({
             where: { id: parseInt(id) },
-            data: { envioId: body.shimpentID }
+            data: { envioId: body.shipmentID }
         });
         return new NextResponse(null, { status: 204 });
     } catch (e) {
