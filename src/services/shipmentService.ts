@@ -24,7 +24,7 @@ export interface Shipment {
 // Helper de routing
 // ─────────────────────────────────────────────
 function getShippingBaseUrl(): string {
-  return process.env.NEXT_PUBLIC_SHIPPING_API_URL ?? '/api/shipping'
+  return process.env.NEXT_PUBLIC_SHIPPING_API_URL || '/api/shipping'
 }
 
 function getHeaders(): HeadersInit {
