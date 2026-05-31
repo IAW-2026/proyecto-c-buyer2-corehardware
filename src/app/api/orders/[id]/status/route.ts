@@ -2,8 +2,8 @@
  * PUT /api/orders/[id]/state
  *
  * Quién llama:
- *   - Payments App (Agustín): cuando MercadoPago confirma/rechaza el pago
- *   - Shipping App (Matias): cuando el estado del envío cambia (EN_CAMINO, ENTREGADO)
+ *   - Payments App: cuando MercadoPago confirma/rechaza el pago
+ *   - Shipping App: cuando el estado del envío cambia (EN_CAMINO, ENTREGADO)
  *
  * Autenticación: API Key (igual que el resto de endpoints inter-servicios)
  *
@@ -31,13 +31,13 @@ const ESTADOS_VALIDOS = [
 
 // Transiciones permitidas — evita que alguien retroceda un estado
 const TRANSICIONES: Record<string, string[]> = {
-  PENDIENTE_PAGO:  ['PAGO_APROBADO', 'PAGO_RECHAZADO', 'CANCELADO'],
-  PAGO_APROBADO:   ['EN_PREPARACION', 'CANCELADO'],
-  PAGO_RECHAZADO:  ['CANCELADO'],
-  EN_PREPARACION:  ['EN_CAMINO', 'CANCELADO'],
-  EN_CAMINO:       ['ENTREGADO', 'CANCELADO'],
-  ENTREGADO:       [],
-  CANCELADO:       [],
+  PENDIENTE_PAGO: ['PAGO_APROBADO', 'PAGO_RECHAZADO', 'CANCELADO'],
+  PAGO_APROBADO: ['EN_PREPARACION', 'CANCELADO'],
+  PAGO_RECHAZADO: ['CANCELADO'],
+  EN_PREPARACION: ['EN_CAMINO', 'CANCELADO'],
+  EN_CAMINO: ['ENTREGADO', 'CANCELADO'],
+  ENTREGADO: [],
+  CANCELADO: [],
 }
 
 export async function PUT(
@@ -45,6 +45,11 @@ export async function PUT(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params
+
+  const pedidoId = parseInt(id)
+  if (isNaN(pedidoId) || pedidoId <= 0) {
+    return NextResponse.json({ message: 'ID de pedido inválido' }, { status: 400 })
+  }
 
   // 1. Validar API Key
   if (!validateApiKey(req)) {
@@ -71,7 +76,7 @@ export async function PUT(
 
   // 4. Buscar el pedido
   const pedidoActual = await prisma.pedido.findUnique({
-    where: { id: parseInt(id) },
+    where: { id: pedidoId },
   })
 
   if (!pedidoActual) {
@@ -92,7 +97,7 @@ export async function PUT(
   // 6. Actualizar el estado
   try {
     const pedidoActualizado = await prisma.pedido.update({
-      where: { id: parseInt(id) },
+      where: { id: pedidoId },
       data: { estado: nuevoEstado },
     })
 
