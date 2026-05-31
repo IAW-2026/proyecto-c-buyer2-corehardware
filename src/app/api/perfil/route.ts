@@ -75,8 +75,9 @@ export async function PUT(req: NextRequest) {
     result.data
 
   const dniExistente = await prisma.comprador.findFirst({
-    where: { dni, NOT: { clerkUserId: userId } },
+    where: { dni, isDeleted: false, NOT: { clerkUserId: userId } },
   })
+  
   if (dniExistente) {
     return NextResponse.json({ error: 'El DNI ya está registrado' }, { status: 409 })
   }

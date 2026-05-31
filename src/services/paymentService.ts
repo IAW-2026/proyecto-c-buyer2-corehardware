@@ -3,7 +3,7 @@
  *
  * ARQUITECTURA:
  *   Browser → paymentService → /api/payments/checkout (API interna, Etapa 2)
- *                           → PAYMENTS_API_URL/checkout (App de Agustín, Etapa 3)
+ *                           → PAYMENTS_API_URL/checkout (App de Pagos, Etapa 3)
  *
  * Para pasar a Etapa 3: definir NEXT_PUBLIC_PAYMENTS_API_URL en .env.local
  * apuntando a la URL de la Payments App. Sin esa variable, usa la API interna.
@@ -64,7 +64,7 @@ export interface CheckoutResponse {
 
 /**
  * Devuelve la URL del endpoint de checkout.
- * - Si NEXT_PUBLIC_PAYMENTS_API_URL está definida → Etapa 3 (app real de Agustín)
+ * - Si NEXT_PUBLIC_PAYMENTS_API_URL está definida → Etapa 3 
  * - Si no → Etapa 2 (API interna mockeada)
  */
 function getCheckoutUrl(): string {

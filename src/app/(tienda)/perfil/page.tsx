@@ -95,7 +95,6 @@ export default function PerfilPage() {
       })
       .then((data: Comprador | null) => {
         if (data) {
-        console.log("DEBUG: Valor de IVA en BD:", data.condicionIva);
           setMail(data.mail)
           setForm({
             nombre: data.nombre,
