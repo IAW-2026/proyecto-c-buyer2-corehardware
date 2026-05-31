@@ -1,8 +1,8 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { useUser } from '@clerk/nextjs'
+import { useUser, useClerk } from '@clerk/nextjs'
 import {
     Box,
     Button,
@@ -120,7 +120,7 @@ const inputBase = {
 export default function CompletarPerfilPage() {
     const router = useRouter()
     const { user } = useUser()
-
+    const { signOut } = useClerk()
     const [values, setValues] = useState<FormValues>({
         nombre: '',
         apellido: '',
@@ -136,6 +136,19 @@ export default function CompletarPerfilPage() {
     const [fieldErrors, setFieldErrors] = useState<FieldErrors>({})
     const [serverError, setServerError] = useState('')
     const [loading, setLoading] = useState(false)
+
+    useEffect(() => {
+        if (!user) return
+        fetch('/api/perfil/check')
+            .then(r => r.json())
+            .then(async ({ completo, deleted }) => {
+                // Si el usuario existe pero está eliminado, sign out y redirigir
+                if (deleted) {
+                    await signOut()
+                    router.push('/productos')
+                }
+            })
+    }, [user])
 
     function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
         const { name, value } = e.target

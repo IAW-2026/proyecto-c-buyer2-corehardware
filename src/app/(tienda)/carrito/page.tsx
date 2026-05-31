@@ -77,7 +77,7 @@ export default function CarritoPage() {
         monto: total // El total de dinero calculado por el contexto
       }
 
-      // 5. Enviar los datos al servicio que se conecta con la Payments App de Agustín
+      // 5. Enviar los datos al servicio que se conecta con la Payments App 
       const respuestaPago = await PaymentService.iniciarCheckout(pedidoPayload, token)
 
       console.log("Checkout exitoso en backend de pagos:", respuestaPago)
