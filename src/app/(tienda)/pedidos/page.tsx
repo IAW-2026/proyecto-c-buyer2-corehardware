@@ -11,10 +11,10 @@ import {
   FaClock, FaCheckCircle, FaTimesCircle, FaTruck,
   FaExclamationCircle, FaTools, FaShoppingBag, FaArrowRight,
 } from 'react-icons/fa'
-import AppNavbar from '@/components/AppNavbar'
 import { BackButton } from '@/components/ui/BackButton'
 import Pagination from '@/components/Pagination'
 import { Pedido, PedidosResponse, EstadoPedido } from '@/types/pedido'
+import { formatFecha } from '@/utils/formatDate'
 
 // ── Config de estados ──────────────────────────────────────────────────────
 
@@ -31,10 +31,6 @@ const ESTADO_CONFIG: Record<EstadoPedido, { label: string; color: string; bg: st
 const LIMIT = 8
 
 // ── Helpers ────────────────────────────────────────────────────────────────
-
-function formatFecha(fecha: string): string {
-  return new Date(fecha).toLocaleDateString('es-AR', { day: '2-digit', month: 'long', year: 'numeric' })
-}
 
 function formatMonto(monto: number): string {
   return monto.toLocaleString('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 })
@@ -303,7 +299,6 @@ export default function PedidosPage() {
   if (!isLoaded) {
     return (
       <>
-        <AppNavbar />
         <Flex
           justify="center"
           align="center"
@@ -319,7 +314,6 @@ export default function PedidosPage() {
 
   return (
     <>
-      <AppNavbar />
       <Container maxW="container.xl" py={8} px={{ base: 4, md: 6 }}>
         <SkipLink />
         <main id="main-content">
