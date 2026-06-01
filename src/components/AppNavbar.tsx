@@ -7,10 +7,24 @@ import { Show, UserButton } from '@clerk/nextjs'
 import Link from 'next/link'
 import AuthButton from '@/components/ui/AuthButton'
 import { useCart } from '@/context/CartContext'
+import { useRouter } from 'next/navigation'
 
 export default function AppNavbar() {
   const [searchOpen, setSearchOpen] = useState(false)
+  const [searchQuery, setSearchQuery] = useState('');
   const { totalItems } = useCart()
+  const router = useRouter()
+
+  const handleSearch = () => {
+    const current = new URLSearchParams(window.location.search)
+    if (searchQuery.trim()) {
+      current.set('search', searchQuery.trim())
+    } else {
+      current.delete('search')
+    }
+    current.set('page', '1')
+    router.push(`/productos?${current.toString()}`)
+  }
 
   return (
     <Box
@@ -54,6 +68,9 @@ export default function AppNavbar() {
           display={{ base: 'none', md: 'block' }}
         >
           <Input
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
             placeholder="Buscar componentes..."
             aria-label="Buscar productos en desktop"
             borderRadius="full"
@@ -74,6 +91,7 @@ export default function AppNavbar() {
             }}
           />
           <IconButton
+            onClick={handleSearch}
             aria-label="Ejecutar búsqueda"
             variant="ghost"
             color="brand.accent"
@@ -247,6 +265,9 @@ export default function AppNavbar() {
           position="relative"
         >
           <Input
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
             placeholder="Buscar componentes..."
             aria-label="Buscar productos en móvil"
             autoFocus
@@ -268,6 +289,7 @@ export default function AppNavbar() {
             }}
           />
           <IconButton
+            onClick={handleSearch}
             aria-label="Ejecutar búsqueda móvil"
             variant="ghost"
             color="brand.accent"

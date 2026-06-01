@@ -1,4 +1,21 @@
+import * as dotenv from 'dotenv'
+dotenv.config({ path: '.env.local' })
+
 import { prisma } from '../src/lib/prisma'
+import { createClerkClient } from '@clerk/backend'
+
+const clerk = createClerkClient({ secretKey: process.env.CLERK_SECRET_KEY })
+
+async function setRole(clerkUserId: string, role: 'buyer' | 'admin') {
+  try {
+    await clerk.users.updateUserMetadata(clerkUserId, {
+      publicMetadata: { role },
+    })
+    console.log(`✅ Rol '${role}' asignado a ${clerkUserId}`)
+  } catch (e) {
+    console.warn(`⚠️  Error real:`, e)
+  }
+}
 
 async function main() {
   console.log('⏳ Iniciando el sembrado de datos (Seed) en Neon...')
@@ -28,7 +45,7 @@ async function main() {
       fechaNacimiento: new Date('1990-05-15'),
       nacionalidad: 'Argentina',
       condicionIva: 'Consumidor Final',
-      clerkUserId: 'user_3DslH4IXlUb92',
+      clerkUserId: 'user_3DsljOvfon8on81VhQH4IXlUb92',
       isDeleted: false,
     },
   })
@@ -82,7 +99,7 @@ async function main() {
       fechaNacimiento: new Date('1998-03-10'),
       nacionalidad: 'Argentina',
       condicionIva: 'Consumidor Final',
-      clerkUserId: 'user_seed_comprador4',
+      clerkUserId: 'user_3EWGYof98vEs1U1uf0THdCs3O0u',
       isDeleted: false,
     },
   })
@@ -100,7 +117,7 @@ async function main() {
       fechaNacimiento: new Date('1993-07-25'),
       nacionalidad: 'Argentina',
       condicionIva: 'Consumidor Final',
-      clerkUserId: 'user_seed_comprador5',
+      clerkUserId: 'user_3EWGn37JZ0yBUajMGrkJCR3Wmwv',
       isDeleted: false,
     },
   })
@@ -118,7 +135,7 @@ async function main() {
       fechaNacimiento: new Date('2001-11-18'),
       nacionalidad: 'Argentina',
       condicionIva: 'Consumidor Final',
-      clerkUserId: 'user_seed_comprador6',
+      clerkUserId: 'user_3EWGwVbYGyg5Kk9Rd1BauDUo2SZ',
       isDeleted: false,
     },
   })
@@ -354,6 +371,17 @@ async function main() {
       },
     },
   })
+
+  // ─────────────────────────────────────────────
+  // 5. ROLES EN CLERK
+  // ─────────────────────────────────────────────
+  console.log('🔑 Asignando roles en Clerk...')
+  await setRole(comprador1.clerkUserId, 'buyer')
+  await setRole(comprador2.clerkUserId, 'buyer')
+  await setRole(comprador3.clerkUserId, 'buyer')
+  await setRole(comprador4.clerkUserId, 'buyer')
+  await setRole(comprador5.clerkUserId, 'buyer')
+  await setRole(comprador6.clerkUserId, 'buyer')
 
   console.log(`
 ✅ Seed completado:
