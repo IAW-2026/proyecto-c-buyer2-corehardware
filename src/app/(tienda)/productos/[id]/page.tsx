@@ -7,8 +7,8 @@ import {
 import { FaArrowLeft, FaShoppingCart, FaShieldAlt, FaBox } from 'react-icons/fa'
 import { useRouter, useParams } from 'next/navigation'
 import { SellerService } from '@/services/sellerService'
-import AppNavbar from '@/components/AppNavbar'
 import { BackButton } from '@/components/ui/BackButton'
+import { AddToCartButton } from '@/components/ui/AddToCartButton'
 
 export default function DetalleProducto() {
     const router = useRouter()
@@ -33,7 +33,6 @@ export default function DetalleProducto() {
     if (loading) {
         return (
             <Box bg="brand.bgMain" minH="100vh">
-                <AppNavbar />
                 <Center mt={20}>
                     <VStack gap={4}>
                         <Spinner color="brand.accent" size="xl" borderWidth="4px" />
@@ -49,7 +48,6 @@ export default function DetalleProducto() {
     if (notFound) {
         return (
             <Box bg="brand.bgMain" minH="100vh">
-                <AppNavbar />
                 <Center mt={20} p={10}>
                     <VStack gap={6}>
                         <Heading size="lg" color="brand.textMain" textAlign="center">
@@ -74,7 +72,6 @@ export default function DetalleProducto() {
 
     return (
         <Box bg="brand.bgMain" minH="100vh" color="brand.textMain">
-            <AppNavbar />
 
             <BackButton />
 
@@ -162,21 +159,9 @@ export default function DetalleProducto() {
                                 </Text>
                             </Text>
                         )}
-                        <Button
-                            bg="brand.accent"
-                            color="brand.bgMain"
-                            w="fit-content"
-                            px={8}
-                            fontWeight="bold"
-                            size="lg"
-                            mt={2}
-                            disabled={producto.stock === 0}
-                            aria-label={`Agregar ${producto.nombre} al carrito`}
-                            _hover={{ bg: 'white', transform: 'scale(1.02)' }}
-                        >
-                            <FaShoppingCart />
-                            <Text ml={2}>Agregar al carrito</Text>
-                        </Button>
+                        <Box mt={4}>
+                            <AddToCartButton producto={producto} isDetailView={true} />
+                        </Box>
                     </VStack>
                 </Flex>
 
