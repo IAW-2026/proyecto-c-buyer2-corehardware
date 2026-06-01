@@ -12,11 +12,11 @@ import {
   FaExclamationCircle, FaMapMarkerAlt, FaCalendarAlt,
   FaBox, FaArrowLeft,
 } from 'react-icons/fa'
-import AppNavbar from '@/components/AppNavbar'
 import { BackButton } from '@/components/ui/BackButton'
 import { ShipmentService, Shipment } from '@/services/shipmentService'
 import { Pedido, EstadoPedido } from '@/types/pedido'
 import { Suspense } from 'react'
+import { formatFechaLarga } from '@/utils/formatDate'
 
 // ── Config de estados del envío ────────────────────────────────────────────
 
@@ -24,28 +24,22 @@ const ENVIO_PASOS = ['pending', 'en_camino', 'entregado'] as const
 type EstadoEnvio = typeof ENVIO_PASOS[number]
 
 const ENVIO_CONFIG: Record<EstadoEnvio, { label: string; color: string; bg: string; icon: React.ElementType }> = {
-  pending:   { label: 'Preparando envío', color: '#F0A500', bg: 'rgba(240,165,0,0.12)',   icon: FaBox },
-  en_camino: { label: 'En camino',         color: '#00D1FF', bg: 'rgba(0,209,255,0.12)',   icon: FaTruck },
-  entregado: { label: 'Entregado',         color: '#34D399', bg: 'rgba(52,211,153,0.12)',  icon: FaCheckCircle },
+  pending: { label: 'Preparando envío', color: '#F0A500', bg: 'rgba(240,165,0,0.12)', icon: FaBox },
+  en_camino: { label: 'En camino', color: '#00D1FF', bg: 'rgba(0,209,255,0.12)', icon: FaTruck },
+  entregado: { label: 'Entregado', color: '#34D399', bg: 'rgba(52,211,153,0.12)', icon: FaCheckCircle },
 }
 
 const ESTADO_PEDIDO_LABEL: Record<EstadoPedido, string> = {
-  PENDIENTE_PAGO:  'Pendiente de pago',
-  PAGO_APROBADO:   'Pago aprobado',
-  PAGO_RECHAZADO:  'Pago rechazado',
-  EN_PREPARACION:  'En preparación',
-  EN_CAMINO:       'En camino',
-  ENTREGADO:       'Entregado',
-  CANCELADO:       'Cancelado',
+  PENDIENTE_PAGO: 'Pendiente de pago',
+  PAGO_APROBADO: 'Pago aprobado',
+  PAGO_RECHAZADO: 'Pago rechazado',
+  EN_PREPARACION: 'En preparación',
+  EN_CAMINO: 'En camino',
+  ENTREGADO: 'Entregado',
+  CANCELADO: 'Cancelado',
 }
 
 // ── Helpers ────────────────────────────────────────────────────────────────
-
-function formatFechaCorta(fecha: string): string {
-  return new Date(fecha).toLocaleDateString('es-AR', {
-    day: '2-digit', month: 'long', year: 'numeric',
-  })
-}
 
 function formatMonto(monto: number): string {
   return monto.toLocaleString('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 })
@@ -173,7 +167,6 @@ function SeguimientoEnvioContent() {
   if (!isLoaded || loading) {
     return (
       <>
-        <AppNavbar />
         <Flex justify="center" align="center" minH="60vh" role="status" aria-label="Cargando seguimiento">
           <VStack gap={3}>
             <Spinner color="brand.accent" size="lg" />
@@ -187,7 +180,6 @@ function SeguimientoEnvioContent() {
   if (error || !envio) {
     return (
       <>
-        <AppNavbar />
         <Container maxW="container.sm" py={8}>
           <Flex direction="column" align="center" gap={4} role="alert">
             <Icon as={FaExclamationCircle} boxSize={10} color="brand.danger" />
@@ -213,7 +205,6 @@ function SeguimientoEnvioContent() {
 
   return (
     <>
-      <AppNavbar />
       <Container maxW="container.sm" py={8} px={{ base: 4, md: 6 }}>
 
         {/* Encabezado */}
@@ -299,7 +290,7 @@ function SeguimientoEnvioContent() {
               </Flex>
               <Text fontSize="sm" color="brand.textMain" fontWeight="semibold">
                 <time dateTime={envio.fecha_de_entrega}>
-                  {formatFechaCorta(envio.fecha_de_entrega)}
+                  {formatFechaLarga(envio.fecha_de_entrega)}
                 </time>
               </Text>
             </VStack>

@@ -60,4 +60,5 @@ model CarritoItem {
   precio     Float   // Desnormalizado: precio al momento de agregar
   imagen     String?
   cantidad   Int     @default(1)
+  vendedorId Int     @default(1)
 }

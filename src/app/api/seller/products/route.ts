@@ -20,13 +20,15 @@ export async function GET(req: NextRequest) {
   const name     = searchParams.get('name')     ?? ''
   const brand    = searchParams.get('brand')    ?? ''
   const hasStock = searchParams.get('hasStock') === 'true'
+  const vendedorId = searchParams.get('vendedorId') ?? ''
   const seller   = searchParams.get('seller')   ?? ''
 
   let filtered = [...MOCK_PRODUCTS_SUMMARY]
 
   if (name)     filtered = filtered.filter(p => p.nombre.toLowerCase().includes(name.toLowerCase()))
   if (brand)    filtered = filtered.filter(p => p.marca.toLowerCase() === brand.toLowerCase())
-  if (hasStock) filtered = filtered.filter(p => p.stock > 0)
+  if (hasStock) filtered = filtered.filter(p => p.stock > 0) //TODO no viene como entero vendedorId?
+  if (vendedorId) filtered = filtered.filter(p => p.vendedorId === parseInt(vendedorId))
   if (seller)   filtered = filtered.filter(p => p.vendedor.toLowerCase() === seller.toLowerCase())
 
   if (filtered.length === 0) {

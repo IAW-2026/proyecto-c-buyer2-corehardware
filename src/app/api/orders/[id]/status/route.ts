@@ -94,7 +94,15 @@ export async function PUT(
     )
   }
 
-  // 6. Actualizar el estado
+  // 6. Validar envio_id para estados que lo requieren
+  if (['EN_CAMINO', 'ENTREGADO'].includes(nuevoEstado) && !pedidoActual.envioId) {
+    return NextResponse.json(
+      { message: `No se puede pasar a ${nuevoEstado} sin un envío asignado (envio_id es null)` },
+      { status: 409 }
+    )
+  }
+
+  // 7. Actualizar el estado
   try {
     const pedidoActualizado = await prisma.pedido.update({
       where: { id: pedidoId },

@@ -12,12 +12,12 @@ import {
   FaExclamationCircle, FaTools, FaBox, FaMapMarkerAlt,
   FaCalendarAlt, FaChevronRight,
 } from 'react-icons/fa'
-import AppNavbar from '@/components/AppNavbar'
 import { BackButton } from '@/components/ui/BackButton'
 import { SellerService } from '@/services/sellerService'
 import { ShipmentService, Shipment } from '@/services/shipmentService'
 import { Pedido, EstadoPedido } from '@/types/pedido'
 import { ProductSummary } from '@/types/producto'
+import { formatFechaConHora, formatFechaLarga } from '@/utils/formatDate'
 
 // ── Tipos ──────────────────────────────────────────────────────────────────
 
@@ -52,19 +52,6 @@ const ENVIO_ESTADO_CONFIG: Record<string, { label: string; color: string; bg: st
 }
 
 // ── Helpers ────────────────────────────────────────────────────────────────
-
-function formatFecha(fecha: string): string {
-  return new Date(fecha).toLocaleDateString('es-AR', {
-    day: '2-digit', month: 'long', year: 'numeric',
-    hour: '2-digit', minute: '2-digit',
-  })
-}
-
-function formatFechaCorta(fecha: string): string {
-  return new Date(fecha).toLocaleDateString('es-AR', {
-    day: '2-digit', month: 'long', year: 'numeric',
-  })
-}
 
 function formatMonto(monto: number): string {
   return monto.toLocaleString('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 })
@@ -334,7 +321,7 @@ function SeguimientoSection({ envioId, onVerDetalle }: SeguimientoSectionProps) 
               </Flex>
               <Text fontSize="sm" color="brand.textMain" fontWeight="medium">
                 <time dateTime={envio.fecha_de_entrega}>
-                  {formatFechaCorta(envio.fecha_de_entrega)}
+                  {formatFechaLarga(envio.fecha_de_entrega)}
                 </time>
               </Text>
             </VStack>
@@ -451,7 +438,6 @@ export default function PedidoDetallePage() {
   if (!isLoaded || loading) {
     return (
       <>
-        <AppNavbar />
         <Flex
           justify="center"
           align="center"
@@ -468,7 +454,6 @@ export default function PedidoDetallePage() {
   if (error || !pedido) {
     return (
       <>
-        <AppNavbar />
         <Container maxW="container.md" py={8}>
           <Flex direction="column" align="center" gap={4} role="alert" aria-live="assertive">
             <Icon as={FaExclamationCircle} boxSize={10} color="brand.danger" aria-hidden="true" />
@@ -494,7 +479,6 @@ export default function PedidoDetallePage() {
 
   return (
     <>
-      <AppNavbar />
       <Container maxW="container.md" py={8} px={{ base: 4, md: 6 }}>
         <SkipLink />
         <main id="main-content">
@@ -637,7 +621,7 @@ export default function PedidoDetallePage() {
               <VStack align="start" gap={0}>
                 <Text fontSize="xs" color="brand.textMuted">Fecha</Text>
                 <Text fontSize="sm" color="brand.textMain" fontWeight="medium">
-                  <time dateTime={pedido.fecha}>{formatFecha(pedido.fecha)}</time>
+                  <time dateTime={pedido.fecha}>{formatFechaConHora(pedido.fecha)}</time>
                 </Text>
               </VStack>
               <VStack align="start" gap={0}>
