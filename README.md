@@ -1,5 +1,9 @@
 # CoreHardware — Buyer App
 
+## 📚 Enunciado del Proyecto
+
+[https://iaw-2026.github.io/proyecto/](https://iaw-2026.github.io/proyecto/)
+
 ## 🔗 Deploy de Producción
 
 **[https://proyecto-c-buyer2-corehardware.vercel.app](https://proyecto-c-buyer2-corehardware.vercel.app)**
