@@ -1,8 +1,8 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { useUser } from '@clerk/nextjs'
+import { useUser, useClerk } from '@clerk/nextjs'
 import {
     Box,
     Button,
@@ -61,10 +61,35 @@ function validateForm(v: FormValues): FieldErrors {
     if (!v.nombre || v.nombre.length < 2) e.nombre = ['Nombre inválido']
     if (!v.apellido || v.apellido.length < 2) e.apellido = ['Apellido inválido']
     if (!v.dni || v.dni.length < 7 || v.dni.length > 8) e.dni = ['DNI debe tener 7 u 8 dígitos']
-    if (!v.cuilCuit || v.cuilCuit.replace(/-/g, '').length < 11) e.cuilCuit = ['CUIL/CUIT inválido']
+
+    if (!v.cuilCuit) {
+        e.cuilCuit = ['CUIL/CUIT requerido']
+    } else {
+        const soloNumeros = v.cuilCuit.replace(/-/g, '')
+        const dniSoloNumeros = v.dni.replace(/-/g, '')
+        const regex = /^\d{2}\d{7,8}\d{1}$/
+        if (!regex.test(soloNumeros)) {
+            e.cuilCuit = ['Formato inválido. Ejemplo: 20-12345678-9']
+        } else if (dniSoloNumeros && !soloNumeros.includes(dniSoloNumeros)) {
+            e.cuilCuit = ['El CUIL/CUIT debe contener tu DNI']
+        }
+    }
+
     if (!v.celular || v.celular.length < 8) e.celular = ['Celular inválido']
     if (!v.direccion || v.direccion.length < 5) e.direccion = ['Dirección inválida']
-    if (!v.fechaNacimiento) e.fechaNacimiento = ['Fecha requerida']
+
+    if (!v.fechaNacimiento) {
+        e.fechaNacimiento = ['Fecha requerida']
+    } else {
+        const fecha = new Date(v.fechaNacimiento)
+        const hoy = new Date()
+        const minAnio = 1900
+        const maxAnio = hoy.getFullYear() - 18
+        if (fecha.getFullYear() < minAnio || fecha.getFullYear() > maxAnio) {
+            e.fechaNacimiento = [`Fecha inválida. Debés tener al menos 18 años y el año debe ser mayor a ${minAnio}`]
+        }
+    }
+
     if (!v.nacionalidad) e.nacionalidad = ['Nacionalidad requerida']
     return e
 }
@@ -120,7 +145,7 @@ const inputBase = {
 export default function CompletarPerfilPage() {
     const router = useRouter()
     const { user } = useUser()
-
+    const { signOut } = useClerk()
     const [values, setValues] = useState<FormValues>({
         nombre: '',
         apellido: '',
@@ -136,6 +161,22 @@ export default function CompletarPerfilPage() {
     const [fieldErrors, setFieldErrors] = useState<FieldErrors>({})
     const [serverError, setServerError] = useState('')
     const [loading, setLoading] = useState(false)
+
+    useEffect(() => {
+        if (!user) return
+        fetch('/api/perfil/check')
+            .then(r => r.json())
+            .then(async ({ completo, deleted }) => {
+                // Si el usuario existe pero está eliminado, sign out y redirigir
+                if (deleted) {
+                    setServerError('Tu cuenta fue desactivada. Serás redirigido.')
+                    setTimeout(async () => {
+                        await signOut()
+                        router.push('/productos')
+                    }, 2000)
+                }
+            })
+    }, [user])
 
     function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
         const { name, value } = e.target

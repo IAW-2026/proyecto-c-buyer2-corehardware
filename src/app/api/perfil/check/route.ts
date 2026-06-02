@@ -14,8 +14,11 @@ export async function GET() {
   })
 
   if (!comprador) {
-    // No existe todavía en la DB (puede pasar si el webhook aún no se disparó)
-    return NextResponse.json({ completo: false })
+    return NextResponse.json({ completo: false, deleted: false })
+  }
+
+  if (comprador.isDeleted) {
+    return NextResponse.json({ completo: false, deleted: true })
   }
 
   // Un perfil está completo si tiene los campos obligatorios rellenos

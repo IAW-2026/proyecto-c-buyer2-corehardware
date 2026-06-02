@@ -7,10 +7,20 @@ const perfilSchema = z.object({
   nombre: z.string().min(2, 'Nombre inválido'),
   apellido: z.string().min(2, 'Apellido inválido'),
   dni: z.string().min(7, 'DNI inválido').max(8, 'DNI inválido'),
-  cuilCuit: z.string().min(11, 'CUIL/CUIT inválido').max(13, 'CUIL/CUIT inválido'),
+  cuilCuit: z.string().refine((v) => {
+    const soloNumeros = v.replace(/-/g, '')
+    return /^\d{2}\d{7,8}\d{1}$/.test(soloNumeros)
+  }, 'Formato de CUIL/CUIT inválido'),
   celular: z.string().min(8, 'Celular inválido'),
   direccion: z.string().min(5, 'Dirección inválida'),
-  fechaNacimiento: z.string().refine((v) => !isNaN(Date.parse(v)), 'Fecha inválida'),
+  fechaNacimiento: z.string().refine((v) => {
+    if (isNaN(Date.parse(v))) return false
+    const fecha = new Date(v)
+    const hoy = new Date()
+    const anio = fecha.getFullYear()
+    const edadMinima = new Date(hoy.getFullYear() - 18, hoy.getMonth(), hoy.getDate())
+    return anio >= 1900 && fecha <= edadMinima
+  }, 'Fecha inválida. Debés tener al menos 18 años.'),
   nacionalidad: z.string().min(2, 'Nacionalidad inválida'),
   sexo: z.string().optional(),
   condicionIva: z.enum([
@@ -75,30 +85,63 @@ export async function PUT(req: NextRequest) {
     result.data
 
   const dniExistente = await prisma.comprador.findFirst({
-    where: { dni, NOT: { clerkUserId: userId } },
+    where: { dni, isDeleted: false, NOT: { clerkUserId: userId } },
   })
+
   if (dniExistente) {
     return NextResponse.json({ error: 'El DNI ya está registrado' }, { status: 409 })
   }
 
+  const soloNumerosCuil = cuilCuit.replace(/-/g, '')
+  if (!soloNumerosCuil.includes(dni)) {
+    return NextResponse.json(
+      { error: 'Datos inválidos', detalles: { cuilCuit: ['El CUIL/CUIT debe contener el DNI'] } },
+      { status: 400 }
+    )
+  }
+
+  const cuilExistente = await prisma.comprador.findFirst({
+    where: { cuilCuit, isDeleted: false, NOT: { clerkUserId: userId } },
+  })
+  if (cuilExistente) {
+    return NextResponse.json({ error: 'El CUIL/CUIT ya está registrado' }, { status: 409 })
+  }
+
   const clerkUser = await currentUser()
 
-  const comprador = await prisma.comprador.upsert({
-    where: { clerkUserId: userId },
-    update: {
-      nombre, apellido, dni, cuilCuit, celular, direccion,
-      fechaNacimiento: new Date(fechaNacimiento),
-      nacionalidad, sexo: sexo ?? null, condicionIva,
-    },
-    create: {
-      clerkUserId: userId,
-      mail: clerkUser?.emailAddresses[0]?.emailAddress ?? '',
-      nombre, apellido, dni, cuilCuit, celular, direccion,
-      fechaNacimiento: new Date(fechaNacimiento),
-      nacionalidad, sexo: sexo ?? null, condicionIva,
-      isDeleted: false,
-    },
-  })
+  let comprador
+  try {
+    comprador = await prisma.comprador.upsert({
+      where: { clerkUserId: userId },
+      update: {
+        nombre, apellido, dni, cuilCuit, celular, direccion,
+        fechaNacimiento: new Date(fechaNacimiento),
+        nacionalidad, sexo: sexo ?? null, condicionIva,
+      },
+      create: {
+        clerkUserId: userId,
+        mail: clerkUser?.emailAddresses[0]?.emailAddress ?? '',
+        nombre, apellido, dni, cuilCuit, celular, direccion,
+        fechaNacimiento: new Date(fechaNacimiento),
+        nacionalidad, sexo: sexo ?? null, condicionIva,
+        isDeleted: false,
+      },
+    })
+  } catch (err: any) {
+    if (err.code === 'P2002') {
+      const campo = err.meta?.driverAdapterError?.cause?.constraint?.fields?.[0] ?? 'campo'
+      const mensajes: Record<string, string> = {
+        dni: 'El DNI ya está registrado con otra cuenta.',
+        cuilCuit: 'El CUIL/CUIT ya está registrado con otra cuenta.',
+        mail: 'El email ya está registrado con otra cuenta.',
+      }
+      return NextResponse.json(
+        { error: mensajes[campo] ?? `El ${campo} ya está en uso.` },
+        { status: 409 }
+      )
+    }
+    return NextResponse.json({ error: 'Error al guardar el perfil' }, { status: 500 })
+  }
 
   return NextResponse.json({ ok: true, compradorId: comprador.id })
 }

@@ -1,7 +1,6 @@
 import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server'
 import { NextResponse } from 'next/server'
 
-// Rutas públicas — cualquiera sin login
 const isPublicRoute = createRouteMatcher([
   '/',
   '/sign-in(.*)',
@@ -10,22 +9,23 @@ const isPublicRoute = createRouteMatcher([
   '/carrito(.*)',
   '/api/webhooks(.*)',
   '/api/orders(.*)',
-  '/api/buyers(.*)', 
-  '/api/seller(.*)',    
-  '/api/shipping(.*)', 
+  '/api/buyers(.*)',
+  '/api/seller(.*)',
+  '/api/shipping(.*)',
 ])
 
-// Rutas del panel admin
 const isAdminRoute = createRouteMatcher(['/dashboard(.*)'])
 
-// Rutas que requieren login + perfil completo
-const isProtectedRoute = createRouteMatcher([
+const isBuyerRoute = createRouteMatcher([
+  '/productos(.*)',
+  '/carrito(.*)',
   '/pedidos(.*)',
-  '/seguimiento_envio(.*)',
   '/perfil(.*)',
+  '/seguimiento_envio(.*)',
+  '/completar-perfil(.*)',
+  '/',
 ])
 
-// Ruta de completar perfil
 const isProfileRoute = createRouteMatcher(['/completar-perfil(.*)'])
 
 export default clerkMiddleware(async (auth, request) => {
@@ -39,19 +39,21 @@ export default clerkMiddleware(async (auth, request) => {
     return NextResponse.redirect(new URL('/sign-in', request.url))
   }
 
-  // ── Admin ──────────────────────────────────────────────────
-  // Solo usuarios con role: "admin" pueden entrar al dashboard
+  // ── Rutas de dashboard — se evalúa ANTES del redirect general ──
   if (isAdminRoute(request)) {
     if (role !== 'admin') {
-      // Si es comprador, lo manda a productos. Si no está logueado, ya fue manejado arriba.
       return NextResponse.redirect(new URL('/productos', request.url))
     }
     return NextResponse.next()
   }
 
-  // ── Comprador logueado ─────────────────────────────────────
-  // En rutas protegidas (checkout, pedidos, perfil) → chequear perfil completo
-  if (!isApi && isProtectedRoute(request)) {
+  // ── Admin fuera del dashboard → redirigir al dashboard ────
+  if (!isApi && role === 'admin' && isBuyerRoute(request)) {
+    return NextResponse.redirect(new URL('/dashboard', request.url))
+  }
+
+  // ── Comprador: si no completó perfil, forzar completar-perfil ─
+  if (!isApi && role !== 'admin' && !isProfileRoute(request)) {
     const checkUrl = new URL('/api/perfil/check', request.url)
     const res = await fetch(checkUrl, {
       headers: { cookie: request.headers.get('cookie') ?? '' },
@@ -64,7 +66,7 @@ export default clerkMiddleware(async (auth, request) => {
     }
   }
 
-  // Si ya tiene perfil completo y va a /completar-perfil → redirigir a productos
+  // ── Comprador: perfil completo no necesita /completar-perfil ─
   if (!isApi && isProfileRoute(request)) {
     const checkUrl = new URL('/api/perfil/check', request.url)
     const res = await fetch(checkUrl, {

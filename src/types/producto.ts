@@ -2,6 +2,7 @@
 export interface ProductSummary {
   id: number;
   nombre: string;
+  vendedorId: number;
   vendedor: string;
   marca: string;
   modelo: string;
@@ -12,7 +13,6 @@ export interface ProductSummary {
 
 // Esto es lo que devuelve GET /api/products/{id} (Completo)
 export interface Product extends ProductSummary {
-  vendedorId: number;
   descripcion: string;
   especificaciones: string;
   garantia: string;

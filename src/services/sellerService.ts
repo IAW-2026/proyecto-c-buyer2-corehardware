@@ -29,6 +29,7 @@ export interface GetProductsParams {
   name?: string
   brand?: string
   hasStock?: boolean
+  sellerId?: number
   seller?: string
 }
 
@@ -66,7 +67,7 @@ export const SellerService = {
   async getProducts(
     params: GetProductsParams
   ): Promise<{ items: ProductSummary[]; total: number }> {
-    const { offset, limit, name, brand, hasStock, seller } = params
+    const { offset, limit, name, brand, hasStock, sellerId, seller } = params
     const base = getSellerBaseUrl()
 
     const url = new URL(`${base}/products`, 'http://localhost') // base ficticia para parsear params
@@ -75,6 +76,7 @@ export const SellerService = {
     if (name)     url.searchParams.set('name', name)
     if (brand)    url.searchParams.set('brand', brand)
     if (hasStock) url.searchParams.set('hasStock', 'true')
+   if (params.sellerId) url.searchParams.set('sellerId', params.sellerId.toString())
     if (seller)   url.searchParams.set('seller', seller)
 
     // Reconstruimos solo el path+query para fetch relativo o absoluto
