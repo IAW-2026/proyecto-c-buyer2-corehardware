@@ -14,7 +14,7 @@ export default function ProductoCard({ producto }: ProductoCardProps) {
   return (
     <Box
       as="article"
-      aria-label={`${producto.nombre}, $${producto.precio.toLocaleString('es-AR')}`}
+      aria-label={`${producto.nombre}, $${producto.precio}`}
       bg="brand.bgCard"
       borderRadius="xl"
       overflow="hidden"
@@ -59,7 +59,7 @@ export default function ProductoCard({ producto }: ProductoCardProps) {
           >
             {producto.nombre}
           </Text>
-          <Text fontSize="xl" fontWeight="black" color="brand.textMain">
+          <Text fontSize="xl" fontWeight="black" color="brand.textMain" suppressHydrationWarning>
             ${producto.precio.toLocaleString('es-AR')}
           </Text>
         </Box>
