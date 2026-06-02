@@ -4,7 +4,7 @@ import ListadoProductos from './ListadoProductos'
 import { ProductosLoading } from '@/components/productos/ProductosEstados'
 
 export const metadata: Metadata = {
-  title: 'Productos | [Tu Marca]',
+  title: 'Productos | [CoreHardware]',
   description: 'Explorá nuestro catálogo de productos con filtros por marca y vendedor.',
 }
 
