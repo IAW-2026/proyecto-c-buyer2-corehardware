@@ -16,12 +16,6 @@ const isPublicRoute = createRouteMatcher([
 
 const isAdminRoute = createRouteMatcher(['/dashboard(.*)'])
 
-// const isProtectedRoute = createRouteMatcher([ //TODO
-//   '/pedidos(.*)',
-//   '/seguimiento_envio(.*)',
-//   '/perfil(.*)',
-// ])
-
 const isBuyerRoute = createRouteMatcher([
   '/productos(.*)',
   '/carrito(.*)',
@@ -38,13 +32,6 @@ export default clerkMiddleware(async (auth, request) => {
   const { userId, sessionClaims } = await auth()
   const isApi = request.nextUrl.pathname.startsWith('/api')
   const role = (sessionClaims?.metadata as any)?.role
-
-  console.log('MIDDLEWARE:', { //TODO
-    pathname: request.nextUrl.pathname,
-    userId: !!userId,
-    role,
-    sessionClaims: sessionClaims?.metadata,
-  })
 
   // ── Sin login ──────────────────────────────────────────────
   if (!userId) {

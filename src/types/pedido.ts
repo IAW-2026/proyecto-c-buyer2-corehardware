@@ -25,3 +25,11 @@ export interface PedidosResponse {
   limit: number
   offset: number
 }
+
+// ── Tipos de detalle de pedido ─────────────────────────────────────────────
+
+import { ProductSummary } from '@/types/producto'
+
+export interface ProductoConCantidad extends ProductSummary {
+  cantidad: number
+}

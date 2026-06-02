@@ -130,9 +130,12 @@ export function CartProvider({ children }: { children: ReactNode }) {
   }
 
   const remover = async (id: number) => {
+    if (!isSignedIn) {
+      setItems(prev => prev.filter(i => i.id !== id))
+      return
+    }
     const item = items.find(i => i.id === id)
     if (!item?.carritoItemId) return
-
     try {
       await fetch(`/api/carrito/items/${item.carritoItemId}`, { method: 'DELETE' })
       setItems(prev => prev.filter(i => i.id !== id))
@@ -142,9 +145,12 @@ export function CartProvider({ children }: { children: ReactNode }) {
   }
 
   const incrementarCantidad = async (id: number) => {
+    if (!isSignedIn) {
+      setItems(prev => prev.map(i => i.id === id ? { ...i, cantidad: i.cantidad + 1 } : i))
+      return
+    }
     const item = items.find(i => i.id === id)
     if (!item?.carritoItemId) return
-
     const nuevaCantidad = item.cantidad + 1
     try {
       await fetch(`/api/carrito/items/${item.carritoItemId}`, {
@@ -152,18 +158,19 @@ export function CartProvider({ children }: { children: ReactNode }) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ cantidad: nuevaCantidad }),
       })
-      setItems(prev => prev.map(i =>
-        i.id === id ? { ...i, cantidad: nuevaCantidad } : i
-      ))
+      setItems(prev => prev.map(i => i.id === id ? { ...i, cantidad: nuevaCantidad } : i))
     } catch (err) {
       console.error('Error incrementando cantidad:', err)
     }
   }
 
   const decrementarCantidad = async (id: number) => {
+    if (!isSignedIn) {
+      setItems(prev => prev.map(i => i.id === id && i.cantidad > 1 ? { ...i, cantidad: i.cantidad - 1 } : i))
+      return
+    }
     const item = items.find(i => i.id === id)
     if (!item?.carritoItemId || item.cantidad <= 1) return
-
     const nuevaCantidad = item.cantidad - 1
     try {
       await fetch(`/api/carrito/items/${item.carritoItemId}`, {
@@ -171,9 +178,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ cantidad: nuevaCantidad }),
       })
-      setItems(prev => prev.map(i =>
-        i.id === id ? { ...i, cantidad: nuevaCantidad } : i
-      ))
+      setItems(prev => prev.map(i => i.id === id ? { ...i, cantidad: nuevaCantidad } : i))
     } catch (err) {
       console.error('Error decrementando cantidad:', err)
     }

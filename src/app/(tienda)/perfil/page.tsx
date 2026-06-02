@@ -18,14 +18,6 @@ import { Comprador } from '@/app/hooks/useComprador'
 // ── Tipos ──────────────────────────────────────────────────────────────────
 
 type FormData = Omit<Comprador, 'id' | 'mail'>
-//TODO
-// const CONDICIONES_IVA = [
-//   'Consumidor Final',
-//   'Responsable Inscripto',
-//   'Monotributista',
-//   'Exento',
-// ]
-
 
 export const CONDICIONES_IVA = createListCollection({
   items: [
@@ -35,8 +27,7 @@ export const CONDICIONES_IVA = createListCollection({
     { label: "Consumidor Final", value: "Consumidor Final" },
   ],
 })
-//TODO
-//const SEXOS = ['M', 'F', 'X'] as const
+
 export const SEXOS = createListCollection({
   items: [
     { label: "Masculino", value: "M" },
