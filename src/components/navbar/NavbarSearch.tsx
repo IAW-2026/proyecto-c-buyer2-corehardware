@@ -1,12 +1,12 @@
 'use client'
 
-import { useState } from 'react'
+import { Suspense, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Box, IconButton } from '@chakra-ui/react'
 import { FaSearch, FaTimes } from 'react-icons/fa'
 import { SearchInput } from '@/components/ui/SearchInput'
 
-export function NavbarSearch() {
+function NavbarSearchInner() {
   const [searchOpen, setSearchOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const router = useRouter()
@@ -84,5 +84,13 @@ export function NavbarSearch() {
         </Box>
       )}
     </>
+  )
+}
+
+export function NavbarSearch() {
+  return (
+    <Suspense fallback={null}>
+      <NavbarSearchInner />
+    </Suspense>
   )
 }
