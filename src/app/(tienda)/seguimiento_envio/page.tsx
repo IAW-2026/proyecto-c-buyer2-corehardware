@@ -122,7 +122,7 @@ function SeguimientoEnvioContent() {
 
           {/* Encabezado */}
           <Flex align="center" gap={3} mb={6}>
-            <BackButton />
+            <BackButton href={pedidoId ? `/pedidos/${pedidoId}` : '/pedidos'} />
             <VStack align="start" gap={0}>
               <Text fontSize="xs" color="brand.textMuted" textTransform="uppercase" letterSpacing="wider">
                 Seguimiento del envío

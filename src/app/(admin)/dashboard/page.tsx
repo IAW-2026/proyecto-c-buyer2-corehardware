@@ -91,7 +91,7 @@ function buildSearchParams(filters: Filters, offset: number): string {
   params.set('limit', LIMIT.toString())
   params.set('offset', offset.toString())
   if (filters.estado) params.set('estado', filters.estado)
-  if (filters.compradorId) params.set('compradorId', filters.compradorId)
+  if (filters.compradorNombre) params.set('compradorNombre', filters.compradorNombre)
   if (filters.fechaDesde) params.set('fechaDesde', filters.fechaDesde)
   if (filters.fechaHasta) params.set('fechaHasta', filters.fechaHasta)
   return params.toString()
@@ -102,13 +102,13 @@ function buildSearchParams(filters: Filters, offset: number): string {
 // ─────────────────────────────────────────────
 interface Filters {
   estado: string
-  compradorId: string
+  compradorNombre: string
   fechaDesde: string
   fechaHasta: string
 }
 
 const FILTERS_EMPTY: Filters = {
-  estado: '', compradorId: '', fechaDesde: '', fechaHasta: '',
+  estado: '', compradorNombre: '', fechaDesde: '', fechaHasta: '',
 }
 
 // ─────────────────────────────────────────────
@@ -196,7 +196,7 @@ export default function DashboardPage() {
         const data = await res.json()
         setStats(data)
       }
-    } catch {}
+    } catch { }
   }, [])
 
   const fetchPedidos = useCallback(async (currentFilters: Filters, currentOffset: number) => {
@@ -337,9 +337,8 @@ export default function DashboardPage() {
                 value={[filters.estado]}
                 onValueChange={(e) => setFilters(prev => ({ ...prev, estado: e.value[0] ?? '' }))}
                 size="sm"
-                id="filtro-estado"
               >
-                <Select.Trigger bg="brand.bgMain" border="1px solid" borderColor="brand.border" color="brand.textMain" borderRadius="lg">
+                <Select.Trigger id="filtro-estado" bg="brand.bgMain" border="1px solid" borderColor="brand.border" color="brand.textMain" borderRadius="lg">
                   <Select.ValueText placeholder="Todos" />
                 </Select.Trigger>
                 <Select.Content bg="brand.bgCard" border="1px solid" borderColor="brand.border">
@@ -352,21 +351,20 @@ export default function DashboardPage() {
 
             <VStack align="start" gap={1}>
               <label htmlFor="filtro-comprador" style={{ fontSize: '12px', color: 'var(--chakra-colors-brand-textMuted)', display: 'block' }}>
-                ID Comprador
+                Comprador
               </label>
               <Input
                 id="filtro-comprador"
-                type="number"
-                placeholder="Ej: 3"
-                value={filters.compradorId}
-                onChange={(e) => setFilters(prev => ({ ...prev, compradorId: e.target.value }))}
+                type="text"
+                placeholder="Nombre o apellido..."
+                value={filters.compradorNombre}
+                onChange={(e) => setFilters(prev => ({ ...prev, compradorNombre: e.target.value }))}
                 bg="brand.bgMain"
                 border="1px solid"
                 borderColor="brand.border"
                 color="brand.textMain"
                 size="sm"
                 borderRadius="lg"
-                min={1}
                 _focus={{ borderColor: 'brand.accent', outline: 'none' }}
               />
             </VStack>

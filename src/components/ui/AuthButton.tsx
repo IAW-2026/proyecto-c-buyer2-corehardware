@@ -17,7 +17,9 @@ export default function AuthButton() {
                 _hover={{ bg: "brand.border", color: "brand.accent" }}
                 _focus={{ ring: "2px", ringColor: "brand.accent", outline: "none" }}
             >
-                <FaUser aria-hidden="true" />
+                <span aria-hidden="true">
+                    <FaUser />
+                </span>
             </IconButton>
         </SignInButton>
     )

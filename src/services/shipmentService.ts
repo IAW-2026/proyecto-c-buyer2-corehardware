@@ -24,7 +24,18 @@ export interface Shipment {
 // Helper de routing
 // ─────────────────────────────────────────────
 function getShippingBaseUrl(): string {
-  return process.env.NEXT_PUBLIC_SHIPPING_API_URL || '/api/shipping'
+  if (process.env.NEXT_PUBLIC_SHIPPING_API_URL) {
+    return process.env.NEXT_PUBLIC_SHIPPING_API_URL
+  }
+  if (typeof window !== 'undefined') {
+    return `${window.location.origin}/api/shipping`
+  }
+  // Server-side: necesita URL absoluta
+  if (process.env.VERCEL_URL) {
+    return `https://${process.env.VERCEL_URL}/api/shipping`
+  }
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'
+  return `${appUrl}/api/shipping`
 }
 
 function getHeaders(): HeadersInit {

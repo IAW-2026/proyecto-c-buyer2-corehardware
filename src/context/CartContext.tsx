@@ -19,7 +19,7 @@ interface CartContextType {
   total: number
 }
 
-const CartContext = createContext<CartContextType | null>(null)
+export const CartContext = createContext<CartContextType | null>(null)
 
 export function CartProvider({ children }: { children: ReactNode }) {
   const { isSignedIn, isLoaded } = useAuth()

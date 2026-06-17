@@ -13,21 +13,16 @@ interface ProductosState {
 }
 
 interface UseProductosFiltrosReturn {
-  // Datos
   data: ProductosState
   loading: boolean
-  // Filtros activos (leídos de la URL)
   search: string
   marca: string
   vendedor: string
   page: number
   offset: number
-  // Opciones para los selects
   todasLasMarcas: string[]
   todosLosVendedores: string[]
-  // Estado derivado
   hayFiltrosActivos: boolean
-  // Handlers
   handleMarcaChange: (nuevaMarca: string) => void
   handleVendedorChange: (nuevoVendedor: string) => void
   handleLimpiarFiltros: () => void
@@ -38,18 +33,41 @@ export function useProductosFiltros(): UseProductosFiltrosReturn {
   const router = useRouter()
   const searchParams = useSearchParams()
 
-  // ── Leer filtros desde la URL ──────────────────────────────────────────
   const search = searchParams.get('search') || ''
   const marca = searchParams.get('marca') || ''
   const vendedor = searchParams.get('vendedor') || ''
   const page = parseInt(searchParams.get('page') || '1')
   const offset = (page - 1) * LIMIT
 
-  // ── Estado ────────────────────────────────────────────────────────────
   const [data, setData] = useState<ProductosState>({ items: [], total: 0 })
   const [loading, setLoading] = useState(true)
   const [todasLasMarcas, setTodasLasMarcas] = useState<string[]>([])
   const [todosLosVendedores, setTodosLosVendedores] = useState<string[]>([])
+
+  // ── Carga opciones de filtros UNA sola vez ────────────────────────────
+  useEffect(() => {
+    const cargarOpciones = async () => {
+      try {
+        const res = await SellerService.getProducts({
+          offset: 0,
+          limit: 200,
+          hasStock: true,
+        })
+        const items = res?.items ?? []
+
+        setTodasLasMarcas(
+          [...new Set(items.map((p) => p.marca).filter(Boolean))].sort() as string[]
+        )
+        setTodosLosVendedores(
+          [...new Set(items.map((p) => p.vendedor).filter(Boolean))].sort() as string[]
+        )
+      } catch (error) {
+        console.error('Error cargando opciones de filtros:', error)
+      }
+    }
+
+    cargarOpciones()
+  }, [])
 
   // ── Actualizar URL ────────────────────────────────────────────────────
   const actualizarURL = useCallback(
@@ -73,7 +91,7 @@ export function useProductosFiltros(): UseProductosFiltrosReturn {
     [router, searchParams],
   )
 
-  // ── Fetch de productos ────────────────────────────────────────────────
+  // ── Fetch de productos filtrados ──────────────────────────────────────
   useEffect(() => {
     const cargarDatos = async () => {
       setLoading(true)
@@ -87,24 +105,7 @@ export function useProductosFiltros(): UseProductosFiltrosReturn {
           seller: vendedor,
         })
 
-        const result: ProductosState = res?.items ? res : { items: [], total: 0 }
-        setData(result)
-
-        // Poblar opciones de filtros solo en la carga inicial (sin filtros activos)
-        // para tener el universo completo de opciones disponibles
-        const esCargaInicial = !marca && !vendedor && !search && page === 1
-        if (esCargaInicial) {
-          const marcasUnicas = [
-            ...new Set(result.items.map((p) => p.marca).filter(Boolean)),
-          ].sort() as string[]
-
-          const vendedoresUnicos = [
-            ...new Set(result.items.map((p) => p.vendedor).filter(Boolean)),
-          ].sort() as string[]
-
-          setTodasLasMarcas(marcasUnicas)
-          setTodosLosVendedores(vendedoresUnicos)
-        }
+        setData(res?.items ? res : { items: [], total: 0 })
       } catch (error) {
         console.error('Error cargando productos:', error)
         setData({ items: [], total: 0 })

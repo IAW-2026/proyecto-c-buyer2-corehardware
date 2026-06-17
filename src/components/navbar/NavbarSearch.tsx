@@ -1,6 +1,6 @@
 'use client'
 
-import { Suspense, useState } from 'react'
+import { Suspense, useState, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Box, IconButton } from '@chakra-ui/react'
 import { FaSearch, FaTimes } from 'react-icons/fa'
@@ -8,9 +8,15 @@ import { SearchInput } from '@/components/ui/SearchInput'
 
 function NavbarSearchInner() {
   const [searchOpen, setSearchOpen] = useState(false)
-  const [searchQuery, setSearchQuery] = useState('')
   const router = useRouter()
   const searchParams = useSearchParams()
+
+  const [searchQuery, setSearchQuery] = useState(searchParams.get('search') || '')
+
+  // Sincronizar con la URL cuando cambia
+  useEffect(() => {
+    setSearchQuery(searchParams.get('search') || '')
+  }, [searchParams])
 
   const handleSearch = () => {
     const current = new URLSearchParams(searchParams.toString())

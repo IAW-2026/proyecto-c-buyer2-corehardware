@@ -94,18 +94,6 @@ export default function ReportesPage() {
                         Reportes
                     </Text>
                 </VStack>
-                <Flex
-                    ml="auto"
-                    w="44px" h="44px"
-                    borderRadius="full"
-                    bg="rgba(0,209,255,0.08)"
-                    border="1px solid"
-                    borderColor="brand.border"
-                    align="center"
-                    justify="center"
-                >
-                    <Icon as={FaChartBar} color="brand.accent" boxSize={4} />
-                </Flex>
             </Flex>
 
             {/* Tabla top compradores */}

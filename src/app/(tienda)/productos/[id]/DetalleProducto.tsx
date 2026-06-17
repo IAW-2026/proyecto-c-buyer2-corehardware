@@ -1,41 +1,13 @@
-'use client'
-import { useState, useEffect } from 'react'
 import {
   Box, Flex, Text, Heading, Badge,
   VStack, HStack, Image
 } from '@chakra-ui/react'
 import { FaBox, FaShieldAlt } from 'react-icons/fa'
-import { useRouter, useParams } from 'next/navigation'
-import { SellerService } from '@/services/sellerService'
 import { BackButton } from '@/components/ui/BackButton'
 import { AddToCartButton } from '@/components/ui/AddToCartButton'
 import { Product } from '@/types/producto'
-import { ProductoLoading, ProductoNotFound } from '@/components/productos/ProductosEstados'
 
-export default function DetalleProducto() {
-  const router = useRouter()
-  const params = useParams()
-  const id = Number(params.id)
-
-  const [producto, setProducto] = useState<Product | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [notFound, setNotFound] = useState(false)
-
-  useEffect(() => {
-    const cargar = async () => {
-      setLoading(true)
-      const data = await SellerService.getProductById(id)
-      if (!data) setNotFound(true)
-      else setProducto(data)
-      setLoading(false)
-    }
-    cargar()
-  }, [id])
-
-  if (loading) return <ProductoLoading />
-  if (notFound) return <ProductoNotFound onVolver={() => router.push('/productos')} />
-  if (!producto) return null
-
+export default function DetalleProducto({ producto }: { producto: Product }) {
   return (
     <Box bg="brand.bgMain" minH="100vh" color="brand.textMain">
       <BackButton />
@@ -69,8 +41,7 @@ export default function DetalleProducto() {
             <Badge
               bg="brand.accent"
               color="brand.bgMain"
-              px={3}
-              py={1}
+              px={3} py={1}
               borderRadius="md"
               fontWeight="black"
               fontSize="xs"
@@ -123,56 +94,26 @@ export default function DetalleProducto() {
         {/* DESCRIPCION Y ESPECIFICACIONES */}
         <Box mt={10} display="flex" flexDirection="column" gap={6}>
           {producto.descripcion && (
-            <Box
-              bg="brand.bgCard"
-              borderRadius="xl"
-              border="1px solid"
-              borderColor="brand.border"
-              p={6}
-            >
-              <Heading as="h2" size="md" color="brand.accent" mb={3}>
-                Descripción
-              </Heading>
-              <Text color="brand.textMuted" lineHeight="1.8">
-                {producto.descripcion}
-              </Text>
+            <Box bg="brand.bgCard" borderRadius="xl" border="1px solid" borderColor="brand.border" p={6}>
+              <Heading as="h2" size="md" color="brand.accent" mb={3}>Descripción</Heading>
+              <Text color="brand.textMuted" lineHeight="1.8">{producto.descripcion}</Text>
             </Box>
           )}
 
           {producto.especificaciones && (
-            <Box
-              bg="brand.bgCard"
-              borderRadius="xl"
-              border="1px solid"
-              borderColor="brand.border"
-              p={6}
-            >
-              <Heading as="h2" size="md" color="brand.accent" mb={3}>
-                Especificaciones
-              </Heading>
-              <Text color="brand.textMuted" lineHeight="1.8" whiteSpace="pre-line">
-                {producto.especificaciones}
-              </Text>
+            <Box bg="brand.bgCard" borderRadius="xl" border="1px solid" borderColor="brand.border" p={6}>
+              <Heading as="h2" size="md" color="brand.accent" mb={3}>Especificaciones</Heading>
+              <Text color="brand.textMuted" lineHeight="1.8" whiteSpace="pre-line">{producto.especificaciones}</Text>
             </Box>
           )}
 
           {producto.garantia && (
-            <Box
-              bg="brand.bgCard"
-              borderRadius="xl"
-              border="1px solid"
-              borderColor="brand.border"
-              p={6}
-            >
+            <Box bg="brand.bgCard" borderRadius="xl" border="1px solid" borderColor="brand.border" p={6}>
               <HStack mb={3}>
                 <FaShieldAlt color="brand.accent" />
-                <Heading as="h2" size="md" color="brand.accent">
-                  Garantía
-                </Heading>
+                <Heading as="h2" size="md" color="brand.accent">Garantía</Heading>
               </HStack>
-              <Text color="brand.textMuted">
-                {producto.garantia}
-              </Text>
+              <Text color="brand.textMuted">{producto.garantia}</Text>
             </Box>
           )}
         </Box>

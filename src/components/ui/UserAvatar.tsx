@@ -1,3 +1,5 @@
+'use client' 
+
 import { Flex } from '@chakra-ui/react'
 import { UserButton } from '@clerk/nextjs'
 import { FaBox, FaUser } from 'react-icons/fa'

@@ -27,20 +27,26 @@ export async function GET(req: NextRequest) {
   if (role !== 'admin') {
     return NextResponse.json({ message: 'Acceso denegado' }, { status: 403 })
   }
-
   // 2. Leer query params
   const { searchParams } = new URL(req.url)
-  const estado      = searchParams.get('estado')      ?? undefined
-  const compradorId = searchParams.get('compradorId') ?? undefined
-  const fechaDesde  = searchParams.get('fechaDesde')  ?? undefined
-  const fechaHasta  = searchParams.get('fechaHasta')  ?? undefined
-  const limit       = Math.min(parseInt(searchParams.get('limit')  ?? '20'), 100)
-  const offset      = Math.max(parseInt(searchParams.get('offset') ?? '0'),  0)
+  const estado = searchParams.get('estado') ?? undefined
+  const compradorNombre = searchParams.get('compradorNombre') ?? undefined
+  const fechaDesde = searchParams.get('fechaDesde') ?? undefined
+  const fechaHasta = searchParams.get('fechaHasta') ?? undefined
+  const limit = Math.min(parseInt(searchParams.get('limit') ?? '20'), 100)
+  const offset = Math.max(parseInt(searchParams.get('offset') ?? '0'), 0)
 
   // 3. Construir filtro — todos los campos son opcionales y combinables
   const where = {
-    ...(estado      ? { estado }                                          : {}),
-    ...(compradorId ? { compradorId: parseInt(compradorId) }              : {}),
+    ...(estado ? { estado } : {}),
+    ...(compradorNombre ? {
+      comprador: {
+        OR: [
+          { nombre: { contains: compradorNombre, mode: 'insensitive' as const } },
+          { apellido: { contains: compradorNombre, mode: 'insensitive' as const } },
+        ]
+      }
+    } : {}),
     ...(fechaDesde || fechaHasta ? {
       fecha: {
         ...(fechaDesde ? { gte: new Date(fechaDesde) } : {}),
@@ -59,10 +65,10 @@ export async function GET(req: NextRequest) {
       include: {
         comprador: {
           select: {
-            id:       true,
-            nombre:   true,
+            id: true,
+            nombre: true,
             apellido: true,
-            mail:     true,
+            mail: true,
           },
         },
       },
@@ -72,17 +78,17 @@ export async function GET(req: NextRequest) {
 
   // 5. Formatear respuesta
   const items = pedidos.map((p) => ({
-    id:          p.id,
-    fecha:       p.fecha,
-    monto:       p.monto,
-    estado:      p.estado,
+    id: p.id,
+    fecha: p.fecha,
+    monto: p.monto,
+    estado: p.estado,
     vendedor_id: p.vendedorId,
-    envio_id:    p.envioId,
-    productos:   p.productosId,
+    envio_id: p.envioId,
+    productos: p.productosId,
     comprador: {
-      id:       p.comprador.id,
-      nombre:   `${p.comprador.nombre} ${p.comprador.apellido}`,
-      mail:     p.comprador.mail,
+      id: p.comprador.id,
+      nombre: `${p.comprador.nombre} ${p.comprador.apellido}`,
+      mail: p.comprador.mail,
     },
   }))
 
