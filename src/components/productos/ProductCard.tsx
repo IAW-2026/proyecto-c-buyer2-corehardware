@@ -1,5 +1,3 @@
-'use client'
-
 import { Box, Image, Text, HStack, Icon } from '@chakra-ui/react'
 import { FaStore } from 'react-icons/fa'
 import Link from 'next/link'
