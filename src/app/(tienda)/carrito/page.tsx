@@ -105,7 +105,7 @@ export default function CarritoPage() {
     >
       {/* Encabezado */}
       <Flex align="center" gap={3} mb={8}>
-        <BackButton />
+        <BackButton href="/productos" />
         <VStack align="start" gap={0}>
           <Text fontSize="xs" color="brand.textMuted" textTransform="uppercase" letterSpacing="wider">
             Compra
