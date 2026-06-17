@@ -227,7 +227,7 @@ export default function CompradoresPage() {
         <Container maxW="container.xl" py={8} px={{ base: 4, md: 6 }}>
 
             {/* Encabezado */}
-            <Flex align="center" gap={3} mb={8}>
+            <Flex align="center" justify="space-between" mb={8} wrap="wrap" gap={4}>
                 <VStack align="start" gap={0}>
                     <Text fontSize="xs" color="brand.textMuted" textTransform="uppercase" letterSpacing="wider">
                         Panel de administración
@@ -236,20 +236,14 @@ export default function CompradoresPage() {
                         Compradores
                     </Text>
                 </VStack>
-                <Flex
-                    ml="auto"
-                    w="44px" h="44px"
-                    borderRadius="full"
-                    bg="rgba(0,209,255,0.08)"
-                    border="1px solid"
-                    borderColor="brand.border"
-                    align="center"
-                    justify="center"
-                >
-                    <Icon as={FaUsers} color="brand.accent" boxSize={4} />
-                </Flex>
+                {!loading && (
+                    <Text fontSize="sm" color="brand.textMuted" aria-live="polite">
+                        {total} {total === 1 ? 'comprador encontrado' : 'compradores encontrados'}
+                        {applied && ' (con búsqueda activa)'}
+                    </Text>
+                )}
             </Flex>
-
+            
             {/* Buscador */}
             <Box
                 bg="brand.bgCard"
@@ -309,14 +303,6 @@ export default function CompradoresPage() {
                     </Box>
                 </Flex>
             </Box>
-
-            {/* Contador */}
-            <Flex justify="flex-end" mb={3}>
-                <Text fontSize="sm" color="brand.textMuted" aria-live="polite">
-                    {total} {total === 1 ? 'comprador encontrado' : 'compradores encontrados'}
-                    {applied && ' (con búsqueda activa)'}
-                </Text>
-            </Flex>
 
             {/* Tabla */}
             <Box
