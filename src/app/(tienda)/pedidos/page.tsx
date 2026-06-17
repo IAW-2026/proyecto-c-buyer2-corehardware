@@ -77,7 +77,7 @@ export default function PedidosPage() {
         <SkipLink />
         <main id="main-content">
           <Flex align="center" gap={3} mb={8}>
-            <BackButton />
+            <BackButton href="/" />
             <VStack align="start" gap={0}>
               <Heading as="h1" size="xl" color="brand.textMain">Mis Pedidos</Heading>
               {!loading && total > 0 && (
