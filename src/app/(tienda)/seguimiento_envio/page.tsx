@@ -1,6 +1,5 @@
 import { auth } from '@clerk/nextjs/server'
 import { redirect } from 'next/navigation'
-import { headers } from 'next/headers'
 import Link from 'next/link'
 import { prisma } from '@/lib/prisma'
 import { Box, Container, Flex, Grid, Text, VStack, Icon } from '@chakra-ui/react'
@@ -8,38 +7,15 @@ import { FaExclamationCircle, FaMapMarkerAlt, FaCalendarAlt, FaBox, FaArrowLeft 
 import { BackButton } from '@/components/ui/BackButton'
 import { SkipLink } from '@/components/ui/SkipLink'
 import { BarraEnvio } from '@/components/seguimiento/BarraEnvio'
-import { Shipment } from '@/services/shipmentService'
 import { Pedido } from '@/types/pedido'
 import { formatMonto } from '@/utils/pedidoUtils'
 import { formatFechaLarga } from '@/utils/formatDate'
 import { ENVIO_CONFIG, ESTADO_PEDIDO_LABEL, EstadoEnvio } from '@/utils/seguimientoUtils'
+import { fetchSellerById } from '@/services/sellerService'
+import { fetchShipmentById } from '@/services/shipmentService'
 
 interface PageProps {
   searchParams: Promise<{ pedidoId?: string; envioId?: string }>
-}
-
-async function fetchEnvio(envioId: string, requestHeaders: Headers): Promise<Shipment | null> {
-  const host = requestHeaders.get('host') ?? 'localhost:3000'
-  const protocol = process.env.NODE_ENV === 'production' ? 'https' : 'http'
-  try {
-    const res = await fetch(`${protocol}://${host}/api/shipping/shipment/${envioId}`, { cache: 'no-store' })
-    if (!res.ok) return null
-    return res.json()
-  } catch {
-    return null
-  }
-}
-
-async function fetchSellerById(id: string, requestHeaders: Headers): Promise<{ razon_social: string } | null> {
-  const host = requestHeaders.get('host') ?? 'localhost:3000'
-  const protocol = process.env.NODE_ENV === 'production' ? 'https' : 'http'
-  try {
-    const res = await fetch(`${protocol}://${host}/api/seller/sellers/${id}`, { cache: 'no-store' })
-    if (!res.ok) return null
-    return res.json()
-  } catch {
-    return null
-  }
 }
 
 export default async function SeguimientoEnvioPage({ searchParams }: PageProps) {
@@ -66,8 +42,7 @@ export default async function SeguimientoEnvioPage({ searchParams }: PageProps) 
     )
   }
 
-  const requestHeaders = await headers()
-  const envio = await fetchEnvio(envioId, requestHeaders)
+  const envio = await fetchShipmentById(envioId)
 
   let pedido: Pedido | null = null
   if (pedidoId) {
@@ -75,7 +50,7 @@ export default async function SeguimientoEnvioPage({ searchParams }: PageProps) 
     if (comprador) {
       const pedidoDB = await prisma.pedido.findUnique({ where: { id: pedidoId } })
       if (pedidoDB && pedidoDB.compradorId === comprador.id) {
-        const vendedor = await fetchSellerById(pedidoDB.vendedorId, requestHeaders)
+        const vendedor = await fetchSellerById(pedidoDB.vendedorId)
         pedido = {
           id:              pedidoDB.id,
           fecha:           pedidoDB.fecha.toISOString(),

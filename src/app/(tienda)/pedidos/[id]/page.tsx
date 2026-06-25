@@ -1,48 +1,17 @@
 import { auth } from '@clerk/nextjs/server'
 import { redirect, notFound } from 'next/navigation'
-import { headers } from 'next/headers'
 import { prisma } from '@/lib/prisma'
 import { agruparProductos } from '@/utils/pedidoUtils'
 import { Pedido, ProductoConCantidad } from '@/types/pedido'
 import PedidoDetallePage from './PedidoDetallePage'
-
-async function fetchProductById(id: string, requestHeaders: Headers) {
-  const host = requestHeaders.get('host') ?? 'localhost:3000'
-  const protocol = process.env.NODE_ENV === 'production' ? 'https' : 'http'
-  const res = await fetch(`${protocol}://${host}/api/seller/products/${id}`, {
-    cache: 'no-store',
-  })
-  if (!res.ok) return null
-  return res.json()
-}
-
-async function fetchShipmentById(id: string, requestHeaders: Headers) {
-  const host = requestHeaders.get('host') ?? 'localhost:3000'
-  const protocol = process.env.NODE_ENV === 'production' ? 'https' : 'http'
-  const res = await fetch(`${protocol}://${host}/api/shipping/shipment/${id}`, {
-    cache: 'no-store',
-  })
-  if (!res.ok) return null
-  return res.json()
-}
-
-async function fetchSellerById(id: string, requestHeaders: Headers) {
-  const host = requestHeaders.get('host') ?? 'localhost:3000'
-  const protocol = process.env.NODE_ENV === 'production' ? 'https' : 'http'
-  const res = await fetch(`${protocol}://${host}/api/seller/sellers/${id}`, {
-    cache: 'no-store',
-  })
-  if (!res.ok) return null
-  return res.json()
-}
+import { fetchSellerById, fetchSellerProductById } from '@/services/sellerService'
+import { fetchShipmentById } from '@/services/shipmentService'
 
 export default async function Page({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
 
   const { userId } = await auth()
   if (!userId) redirect(`/sign-in?redirectUrl=/pedidos/${id}`)
-
-  const requestHeaders = await headers()
 
   const comprador = await prisma.comprador.findUnique({ where: { clerkUserId: userId } })
   if (!comprador) notFound()
@@ -51,8 +20,7 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
   if (!pedidoDB) notFound()
   if (pedidoDB.compradorId !== comprador.id) notFound()
 
-  // Obtener nombre del vendedor
-  const vendedor = await fetchSellerById(pedidoDB.vendedorId, requestHeaders)
+  const vendedor = await fetchSellerById(pedidoDB.vendedorId)
 
   const pedido: Pedido = {
     id:              pedidoDB.id,
@@ -69,7 +37,7 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
   const agrupados = agruparProductos(pedido.productos)
   const idsUnicos = [...new Set(pedido.productos)]
   const resultados = await Promise.all(
-    idsUnicos.map((pid) => fetchProductById(pid, requestHeaders))
+    idsUnicos.map((pid) => fetchSellerProductById(pid))
   )
   const productos: ProductoConCantidad[] = resultados
     .filter((p): p is NonNullable<typeof p> => p !== null)
@@ -79,7 +47,7 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
     }))
 
   const envio = pedido.envio_id
-    ? await fetchShipmentById(pedido.envio_id, requestHeaders)
+    ? await fetchShipmentById(pedido.envio_id)
     : null
 
   return <PedidoDetallePage pedido={pedido} productos={productos} envio={envio} />

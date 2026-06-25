@@ -1,6 +1,5 @@
 import { auth } from '@clerk/nextjs/server'
 import { redirect } from 'next/navigation'
-import { headers } from 'next/headers'
 import { prisma } from '@/lib/prisma'
 import { Container, Flex, Grid, Heading, Text, VStack } from '@chakra-ui/react'
 import { BackButton } from '@/components/ui/BackButton'
@@ -9,23 +8,12 @@ import { PedidoCard } from '@/components/pedidos/PedidoCard'
 import { EmptyState } from '@/components/pedidos/PedidosEstados'
 import PedidosPaginacion from '@/components/pedidos/PedidosPaginacion'
 import { Pedido } from '@/types/pedido'
+import { fetchSellerById } from '@/services/sellerService'
 
 const LIMIT = 8
 
 interface PageProps {
   searchParams: Promise<{ offset?: string }>
-}
-
-async function fetchSellerById(id: string, requestHeaders: Headers): Promise<{ razon_social: string } | null> {
-  const host = requestHeaders.get('host') ?? 'localhost:3000'
-  const protocol = process.env.NODE_ENV === 'production' ? 'https' : 'http'
-  try {
-    const res = await fetch(`${protocol}://${host}/api/seller/sellers/${id}`, { cache: 'no-store' })
-    if (!res.ok) return null
-    return res.json()
-  } catch {
-    return null
-  }
 }
 
 export default async function PedidosPage({ searchParams }: PageProps) {
@@ -48,12 +36,9 @@ export default async function PedidosPage({ searchParams }: PageProps) {
     prisma.pedido.count({ where: { compradorId: comprador.id } }),
   ])
 
-  const requestHeaders = await headers()
-
-  // Fetch vendedores únicos en paralelo
   const vendedorIds = [...new Set(pedidosDB.map((p) => p.vendedorId))]
   const vendedorResults = await Promise.all(
-    vendedorIds.map((id) => fetchSellerById(id, requestHeaders))
+    vendedorIds.map((id) => fetchSellerById(id))
   )
   const vendedorMap = Object.fromEntries(
     vendedorIds.map((id, i) => [id, vendedorResults[i]?.razon_social ?? null])

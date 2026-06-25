@@ -82,6 +82,39 @@ export async function fetchSellerProducts(
   return res.json()
 }
 
+export async function fetchSellerById(id: string): Promise<{ razon_social: string } | null> {
+  if (isMockMode()) {
+    // importá tus mocks si tenés mockSellers, si no retorná null
+    return null
+  }
+
+  const sellerUrl = process.env.SELLER_API_URL
+  if (!sellerUrl) throw new Error('SELLER_API_URL no configurada')
+
+  const res = await fetch(`${sellerUrl}/api/sellers/${id}`, {
+    headers: getSellerHeaders(),
+    cache: 'no-store',
+  })
+
+  if (!res.ok) return null
+  return res.json()
+}
+
+export async function fetchSellerProductById(id: string): Promise<Product | null> {
+  if (isMockMode()) return null
+
+  const sellerUrl = process.env.SELLER_API_URL
+  if (!sellerUrl) throw new Error('SELLER_API_URL no configurada')
+
+  const res = await fetch(`${sellerUrl}/api/products/${id}`, {
+    headers: getSellerHeaders(),
+    cache: 'no-store',
+  })
+
+  if (!res.ok) return null
+  return res.json()
+}
+
 // ─────────────────────────────────────────────
 // CLIENT-SIDE: proxy interno (sin API key expuesta)
 // Solo usar desde Client Components
@@ -128,4 +161,5 @@ export const SellerService = {
     if (!response.ok) throw new Error(`Error al obtener vendedor ${id}: ${response.status}`)
     return response.json()
   },
+
 }
