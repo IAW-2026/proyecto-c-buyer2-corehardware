@@ -2,6 +2,7 @@ import { Box, Image, Text, HStack, Icon } from '@chakra-ui/react'
 import { FaStore } from 'react-icons/fa'
 import Link from 'next/link'
 import { AddToCartButton } from '@/components/ui/AddToCartButton'
+import { CartBadge } from '@/components/productos/CartBadge'
 import { ProductSummary } from '@/types/producto'
 
 interface ProductoCardProps {
@@ -36,6 +37,7 @@ export default function ProductoCard({ producto }: ProductoCardProps) {
             objectFit="contain"
             p={2}
           />
+          <CartBadge productoId={producto.id} />
         </Box>
         <Box p={4}>
           <Text fontWeight="bold" fontSize="xs" color="brand.accent" mb={1}>
