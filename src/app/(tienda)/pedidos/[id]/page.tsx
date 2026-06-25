@@ -4,7 +4,7 @@ import { prisma } from '@/lib/prisma'
 import { agruparProductos } from '@/utils/pedidoUtils'
 import { Pedido, ProductoConCantidad } from '@/types/pedido'
 import PedidoDetallePage from './PedidoDetallePage'
-import { fetchSellerById, fetchSellerProductById } from '@/services/sellerService'
+import { fetchSellerProductById } from '@/services/sellerService'
 import { fetchShipmentById } from '@/services/shipmentService'
 
 export default async function Page({ params }: { params: Promise<{ id: string }> }) {
@@ -20,25 +20,27 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
   if (!pedidoDB) notFound()
   if (pedidoDB.compradorId !== comprador.id) notFound()
 
-  const vendedor = await fetchSellerById(pedidoDB.vendedorId)
+  const agrupados = agruparProductos(pedidoDB.productosId)
+  const idsUnicos = [...new Set(pedidoDB.productosId)]
+  const resultados = await Promise.all(
+    idsUnicos.map((pid) => fetchSellerProductById(pid))
+  )
+
+  // El nombre del vendedor viene en cada producto — evitamos un fetch extra a /api/sellers/:id
+  const vendedorNombre = resultados.find((p) => p !== null)?.vendedor ?? null
 
   const pedido: Pedido = {
     id:              pedidoDB.id,
     fecha:           pedidoDB.fecha.toISOString(),
     comprador_id:    pedidoDB.compradorId,
     vendedor_id:     pedidoDB.vendedorId,
-    vendedor_nombre: vendedor?.razon_social ?? null,
+    vendedor_nombre: vendedorNombre,
     productos:       pedidoDB.productosId,
     monto:           pedidoDB.monto,
     estado:          pedidoDB.estado as Pedido['estado'],
     envio_id:        pedidoDB.envioId ?? null,
   }
 
-  const agrupados = agruparProductos(pedido.productos)
-  const idsUnicos = [...new Set(pedido.productos)]
-  const resultados = await Promise.all(
-    idsUnicos.map((pid) => fetchSellerProductById(pid))
-  )
   const productos: ProductoConCantidad[] = resultados
     .filter((p): p is NonNullable<typeof p> => p !== null)
     .map((p) => ({
