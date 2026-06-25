@@ -1,9 +1,9 @@
 import { Suspense } from 'react'
 import { Metadata } from 'next'
-import { headers } from 'next/headers'
 import { ProductosLoading } from '@/components/productos/ProductosEstados'
 import ListadoProductos from './ListadoProductos'
 import { ProductSummary } from '@/types/producto'
+import { fetchSellerProducts } from '@/services/sellerService'  // ← directo
 
 export const metadata: Metadata = {
   title: 'Productos | CoreHardware',
@@ -21,26 +21,10 @@ interface PageProps {
 
 const LIMIT = 20
 
-async function fetchProductos(params: URLSearchParams, requestHeaders: Headers) {
-  const host = requestHeaders.get('host') ?? 'localhost:3000'
-  const protocol = process.env.NODE_ENV === 'production' ? 'https' : 'http'
-  try {
-    const res = await fetch(`${protocol}://${host}/api/seller/products?${params.toString()}`, {
-      cache: 'no-store',
-    })
-    if (!res.ok) return { items: [], total: 0 }
-    return res.json()
-  } catch {
-    return { items: [], total: 0 }
-  }
-}
-
 export default async function ProductosPage({ searchParams }: PageProps) {
   const { search = '', marca = '', vendedor = '', page = '1' } = await searchParams
   const currentPage = Math.max(Number(page) || 1, 1)
   const offset = (currentPage - 1) * LIMIT
-
-  const requestHeaders = await headers()
 
   const params = new URLSearchParams()
   params.set('offset', String(offset))
@@ -56,8 +40,8 @@ export default async function ProductosPage({ searchParams }: PageProps) {
   opcionesParams.set('hasStock', 'true')
 
   const [data, opciones] = await Promise.all([
-    fetchProductos(params, requestHeaders),
-    fetchProductos(opcionesParams, requestHeaders),
+    fetchSellerProducts(params),
+    fetchSellerProducts(opcionesParams),
   ])
 
   const todasLasMarcas = [...new Set(
