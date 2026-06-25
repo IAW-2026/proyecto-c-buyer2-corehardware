@@ -1,7 +1,5 @@
-'use client'
-
+import Link from 'next/link'
 import { Button, Text } from '@chakra-ui/react'
-import { useRouter } from 'next/navigation'
 import { FaArrowLeft } from 'react-icons/fa'
 
 interface BackButtonProps {
@@ -9,14 +7,16 @@ interface BackButtonProps {
 }
 
 export function BackButton({ href }: BackButtonProps) {
-  const router = useRouter()
   return (
-    <Button
-      variant="ghost" color="brand.accent"
-      onClick={() => router.push(href)}
-      aria-label="Volver atrás" _hover={{ bg: "brand.bgCard" }}
-    >
-      <FaArrowLeft /> <Text ml={2}>Volver</Text>
-    </Button>
+    <Link href={href} aria-label="Volver atrás">
+      <Button
+        variant="ghost"
+        color="brand.accent"
+        _hover={{ bg: 'brand.bgCard' }}
+        tabIndex={-1}
+      >
+        <FaArrowLeft /> <Text ml={2}>Volver</Text>
+      </Button>
+    </Link>
   )
 }
