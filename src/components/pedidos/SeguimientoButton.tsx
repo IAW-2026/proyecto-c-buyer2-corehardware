@@ -5,8 +5,8 @@ import { FaTruck, FaChevronRight } from 'react-icons/fa'
 import { useRouter } from 'next/navigation'
 
 interface Props {
-  pedidoId: number
-  envioId: number
+  pedidoId: string  // antes: number
+  envioId: string   // antes: number
 }
 
 export function SeguimientoButton({ pedidoId, envioId }: Props) {
