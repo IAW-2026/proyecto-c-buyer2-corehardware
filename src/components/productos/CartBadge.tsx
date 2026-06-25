@@ -1,5 +1,6 @@
 'use client'
 
+import { memo } from 'react'
 import { useCart } from '@/context/CartContext'
 import { Box, Text } from '@chakra-ui/react'
 
@@ -7,7 +8,7 @@ interface CartBadgeProps {
   productoId: string
 }
 
-export function CartBadge({ productoId }: CartBadgeProps) {
+export const CartBadge = memo(function CartBadge({ productoId }: CartBadgeProps) {
   const { items } = useCart()
   const item = items.find(i => i.id === productoId)
   if (!item || item.cantidad === 0) return null
@@ -34,4 +35,4 @@ export function CartBadge({ productoId }: CartBadgeProps) {
       </Text>
     </Box>
   )
-}
+})

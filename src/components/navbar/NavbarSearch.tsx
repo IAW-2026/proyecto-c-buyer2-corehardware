@@ -1,6 +1,6 @@
 'use client'
 
-import { Suspense, useState, useEffect } from 'react'
+import { Suspense, useState, useEffect, useCallback, useRef } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Box, IconButton } from '@chakra-ui/react'
 import { FaSearch, FaTimes } from 'react-icons/fa'
@@ -10,16 +10,19 @@ function NavbarSearchInner() {
   const [searchOpen, setSearchOpen] = useState(false)
   const router = useRouter()
   const searchParams = useSearchParams()
-
   const [searchQuery, setSearchQuery] = useState(searchParams.get('search') || '')
 
-  // Sincronizar con la URL cuando cambia
+  const searchParamsRef = useRef(searchParams)
+  useEffect(() => {
+    searchParamsRef.current = searchParams
+  }, [searchParams])
+
   useEffect(() => {
     setSearchQuery(searchParams.get('search') || '')
   }, [searchParams])
 
-  const handleSearch = () => {
-    const current = new URLSearchParams(searchParams.toString())
+  const handleSearch = useCallback(() => {
+    const current = new URLSearchParams(searchParamsRef.current.toString())
     if (searchQuery.trim()) {
       current.set('search', searchQuery.trim())
     } else {
@@ -27,11 +30,14 @@ function NavbarSearchInner() {
     }
     current.set('page', '1')
     router.push(`/productos?${current.toString()}`)
-  }
+  }, [searchQuery, router]) 
+
+  const handleToggle = useCallback(() => {
+    setSearchOpen(prev => !prev)
+  }, [])
 
   return (
     <>
-      {/* BÚSQUEDA DESKTOP */}
       <Box
         as="search"
         role="search"
@@ -49,7 +55,6 @@ function NavbarSearchInner() {
         />
       </Box>
 
-      {/* LUPA / CRUZ — solo mobile */}
       <IconButton
         aria-label={searchOpen ? 'Cerrar barra de búsqueda' : 'Abrir barra de búsqueda'}
         aria-expanded={searchOpen}
@@ -60,7 +65,7 @@ function NavbarSearchInner() {
         h="44px"
         w="44px"
         display={{ base: 'flex', md: 'none' }}
-        onClick={() => setSearchOpen((prev) => !prev)}
+        onClick={handleToggle}
         _hover={{ bg: 'brand.border', color: 'brand.accent' }}
         _focus={{ ring: '2px', ringColor: 'brand.accent', outline: 'none' }}
       >
@@ -70,7 +75,6 @@ function NavbarSearchInner() {
         }
       </IconButton>
 
-      {/* BÚSQUEDA MOBILE */}
       {searchOpen && (
         <Box
           as="search"
