@@ -38,24 +38,6 @@ interface FormValues {
     condicionIva: string
 }
 
-const sexoOptions = createListCollection({
-    items: [
-        { label: 'No especificar', value: '' },
-        { label: 'Masculino', value: 'M' },
-        { label: 'Femenino', value: 'F' },
-        { label: 'No binario', value: 'X' },
-    ],
-})
-
-const ivaOptions = createListCollection({
-    items: [
-        { label: 'Consumidor Final', value: 'Consumidor Final' },
-        { label: 'Responsable Inscripto', value: 'Responsable Inscripto' },
-        { label: 'Monotributista', value: 'Monotributista' },
-        { label: 'Exento', value: 'Exento' },
-    ],
-})
-
 function validateForm(v: FormValues): FieldErrors {
     const e: FieldErrors = {}
     if (!v.nombre || v.nombre.length < 2) e.nombre = ['Nombre inválido']
@@ -146,6 +128,25 @@ export default function CompletarPerfilPage() {
     const router = useRouter()
     const { user } = useUser()
     const { signOut } = useClerk()
+
+    const sexoOptions = createListCollection({
+        items: [
+            { label: 'No especificar', value: '' },
+            { label: 'Masculino', value: 'M' },
+            { label: 'Femenino', value: 'F' },
+            { label: 'No binario', value: 'X' },
+        ],
+    })
+
+    const ivaOptions = createListCollection({
+        items: [
+            { label: 'Consumidor Final', value: 'Consumidor Final' },
+            { label: 'Responsable Inscripto', value: 'Responsable Inscripto' },
+            { label: 'Monotributista', value: 'Monotributista' },
+            { label: 'Exento', value: 'Exento' },
+        ],
+    })
+
     const [values, setValues] = useState<FormValues>({
         nombre: '',
         apellido: '',
@@ -166,8 +167,7 @@ export default function CompletarPerfilPage() {
         if (!user) return
         fetch('/api/perfil/check')
             .then(r => r.json())
-            .then(async ({ completo, deleted }) => {
-                // Si el usuario existe pero está eliminado, sign out y redirigir
+            .then(async ({ deleted }) => {
                 if (deleted) {
                     setServerError('Tu cuenta fue desactivada. Serás redirigido.')
                     setTimeout(async () => {
@@ -250,7 +250,6 @@ export default function CompletarPerfilPage() {
                     borderRadius="16px"
                     p={{ base: 6, md: 10 }}
                 >
-                    {/* ── Datos personales ── */}
                     <SectionLabel>Datos personales</SectionLabel>
 
                     <Grid templateColumns="1fr 1fr" gap={3} mb={3}>
@@ -278,7 +277,6 @@ export default function CompletarPerfilPage() {
 
                     <Divider />
 
-                    {/* ── Identificación ── */}
                     <SectionLabel>Identificación</SectionLabel>
 
                     <Grid templateColumns="1fr 1fr" gap={3} mb={3}>
@@ -350,7 +348,6 @@ export default function CompletarPerfilPage() {
 
                     <Divider />
 
-                    {/* ── Contacto y ubicación ── */}
                     <SectionLabel>Contacto y ubicación</SectionLabel>
 
                     <Stack mb={3}>
@@ -392,7 +389,6 @@ export default function CompletarPerfilPage() {
 
                     <Divider />
 
-                    {/* ── Datos fiscales ── */}
                     <SectionLabel>Datos fiscales</SectionLabel>
 
                     <FieldWrapper label="Condición IVA" error={fieldErrors.condicionIva?.[0]}>

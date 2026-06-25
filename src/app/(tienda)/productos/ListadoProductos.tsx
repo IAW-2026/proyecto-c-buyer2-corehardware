@@ -1,36 +1,65 @@
 'use client'
 
-import { useRouter } from 'next/navigation'
+import { useRouter, usePathname, useSearchParams } from 'next/navigation'
 import { Box, Flex, SimpleGrid } from '@chakra-ui/react'
-import { useProductosFiltros, LIMIT } from '@/app/hooks/useProductosFiltros'
-import { ProductosLoading, ProductosEmptyState } from '@/components/productos/ProductosEstados'
+import { ProductosEmptyState } from '@/components/productos/ProductosEstadosClient'
 import Pagination from '@/components/Pagination'
 import ProductoCard from '@/components/productos/ProductCard'
 import FiltrosProductos from '@/components/productos/FiltrosProductos'
 import { ProductSummary } from '@/types/producto'
 
-export default function ListadoProductos() {
-  const router = useRouter()
-  const {
-    data,
-    loading,
-    marca,
-    vendedor,
-    offset,
-    todasLasMarcas,
-    todosLosVendedores,
-    hayFiltrosActivos,
-    handleMarcaChange,
-    handleVendedorChange,
-    handleLimpiarFiltros,
-    handlePageChange,
-  } = useProductosFiltros()
+const LIMIT = 20
 
-  if (loading) {
-    return <ProductosLoading />
+interface Props {
+  items: ProductSummary[]
+  total: number
+  offset: number
+  search: string
+  marca: string
+  vendedor: string
+  todasLasMarcas: string[]
+  todosLosVendedores: string[]
+}
+
+export default function ListadoProductos({
+  items, total, offset, search, marca, vendedor,
+  todasLasMarcas, todosLosVendedores,
+}: Props) {
+  const router = useRouter()
+  const pathname = usePathname()
+  const searchParams = useSearchParams()
+
+  const hayFiltrosActivos = !!(marca || vendedor)
+
+  const actualizarURL = (nuevosParams: Record<string, string>) => {
+    const current = new URLSearchParams(searchParams.toString())
+    Object.entries(nuevosParams).forEach(([key, value]) => {
+      value ? current.set(key, value) : current.delete(key)
+    })
+    current.set('page', '1')
+    router.push(`${pathname}?${current.toString()}`)
   }
 
-  if (data.items.length === 0) {
+  const handleMarcaChange = (nuevaMarca: string) =>
+    actualizarURL({ marca: nuevaMarca })
+
+  const handleVendedorChange = (nuevoVendedor: string) =>
+    actualizarURL({ vendedor: nuevoVendedor })
+
+  const handleLimpiarFiltros = () => {
+    const current = new URLSearchParams()
+    if (search) current.set('search', search)
+    current.set('page', '1')
+    router.push(`${pathname}?${current.toString()}`)
+  }
+
+  const handlePageChange = (newOffset: number) => {
+    const newPage = Math.floor(newOffset / LIMIT) + 1
+    actualizarURL({ page: newPage.toString() })
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
+  if (items.length === 0) {
     return (
       <ProductosEmptyState
         hayFiltrosActivos={hayFiltrosActivos}
@@ -41,8 +70,6 @@ export default function ListadoProductos() {
 
   return (
     <Box as="main" bg="brand.bgMain" minH="100vh" color="brand.textMain">
-
-      {/* Banner promocional */}
       <Box w="full" px={{ base: 4, md: 8 }} mt={6}>
         <Box
           borderRadius="2xl"
@@ -62,15 +89,7 @@ export default function ListadoProductos() {
         </Box>
       </Box>
 
-      {/* Filtros + grilla */}
-      <Flex
-        w="full"
-        px={8}
-        py={10}
-        gap={6}
-        align="flex-start"
-        direction={{ base: 'column', lg: 'row' }}
-      >
+      <Flex w="full" px={8} py={10} gap={6} align="flex-start" direction={{ base: 'column', lg: 'row' }}>
         <FiltrosProductos
           marcas={todasLasMarcas}
           vendedores={todosLosVendedores}
@@ -89,13 +108,13 @@ export default function ListadoProductos() {
             as="section"
             aria-label="Listado de productos"
           >
-            {data.items.map((prod: ProductSummary) => (
+            {items.map((prod) => (
               <ProductoCard key={prod.id} producto={prod} />
             ))}
           </SimpleGrid>
 
           <Pagination
-            totalItems={data.total}
+            totalItems={total}
             limit={LIMIT}
             offset={offset}
             onPageChange={handlePageChange}
