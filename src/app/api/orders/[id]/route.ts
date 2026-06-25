@@ -6,7 +6,6 @@ import { auth } from '@clerk/nextjs/server'
 export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
 
-  // Autenticación: API Key (otras apps) o JWT de Clerk (frontend propio)
   const apiKeyValida = validateApiKey(req)
   const { userId } = await auth()
 
@@ -14,10 +13,13 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
     return NextResponse.json({ message: 'No autorizado' }, { status: 401 })
   }
 
-  const pedido = await prisma.pedido.findUnique({ where: { id: parseInt(id) } })
+  if (!id || id.trim() === '') {
+    return NextResponse.json({ message: 'ID de pedido inválido' }, { status: 400 })
+  }
+
+  const pedido = await prisma.pedido.findUnique({ where: { id } })
   if (!pedido) return NextResponse.json({ message: 'Pedido no encontrado' }, { status: 404 })
 
-  // Si es llamada con JWT de Clerk, verificar que el pedido pertenece al comprador
   if (userId && !apiKeyValida) {
     const comprador = await prisma.comprador.findUnique({ where: { clerkUserId: userId } })
     if (!comprador || comprador.id !== pedido.compradorId) {
