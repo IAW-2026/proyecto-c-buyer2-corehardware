@@ -1,16 +1,11 @@
 'use client'
 
-import Link from 'next/link'
 import { Flex, Heading, Text, VStack, Icon } from '@chakra-ui/react'
 import { FaExclamationTriangle } from 'react-icons/fa'
-import { useAuth } from '@clerk/nextjs'
+import { NotFoundViewLink } from './NotFoundViewLink'
 import { brandColors } from '@/styles/colors'
 
 export default function NotFoundView() {
-  const { sessionClaims, isLoaded } = useAuth()
-  const role = (sessionClaims?.metadata as any)?.role
-  const isAdmin = role === 'admin'
-
   return (
     <Flex minH="80vh" align="center" justify="center" bg={brandColors.bgMain} px={4}>
       <VStack gap={6} textAlign="center">
@@ -26,23 +21,7 @@ export default function NotFoundView() {
             La página que buscás no existe o fue movida.
           </Text>
         </VStack>
-        {isLoaded && (
-          <Link
-            href={isAdmin ? '/dashboard' : '/productos'}
-            style={{
-              padding: '12px 24px',
-              background: brandColors.accent,
-              color: brandColors.bgMain,
-              borderRadius: '8px',
-              fontWeight: 'bold',
-              fontSize: '14px',
-              textDecoration: 'none',
-            }}
-            aria-label={isAdmin ? 'Ir al dashboard' : 'Ir al catálogo de productos'}
-          >
-            {isAdmin ? 'Ir al dashboard' : 'Ver productos'}
-          </Link>
-        )}
+        <NotFoundViewLink />
       </VStack>
     </Flex>
   )
