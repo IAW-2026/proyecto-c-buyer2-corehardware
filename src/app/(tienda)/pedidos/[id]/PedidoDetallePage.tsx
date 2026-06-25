@@ -123,7 +123,9 @@ export default function PedidoDetallePage({ pedido, productos, envio }: Props) {
             </VStack>
             <VStack align="start" gap={0}>
               <Text fontSize="xs" color="brand.textMuted">Vendedor</Text>
-              <Text fontSize="sm" color="brand.textMain" fontWeight="medium">#{pedido.vendedor_id}</Text>
+              <Text fontSize="sm" color="brand.textMain" fontWeight="medium">
+                {pedido.vendedor_nombre ?? `#${pedido.vendedor_id}`}
+              </Text>
             </VStack>
           </Grid>
         </Box>

@@ -9,7 +9,7 @@ import { SeguimientoButton } from './SeguimientoButton'
 
 interface SeguimientoSectionProps {
   envio: Shipment
-  pedidoId: number
+  pedidoId: string
 }
 
 export function SeguimientoSection({ envio, pedidoId }: SeguimientoSectionProps) {

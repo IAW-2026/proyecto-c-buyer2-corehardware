@@ -56,7 +56,7 @@ export default function CarritoPage() {
 
       const pedidoPayload = {
         fecha: new Date().toLocaleString('sv-SE', { timeZone: 'America/Argentina/Buenos_Aires' }).replace(' ', 'T'),
-        vendedorId: items[0]?.vendedorId || 1,
+        vendedorId: items[0]?.vendedorId ?? 'seller_001',
         productos: productosAplanados,
         monto: total,
       }

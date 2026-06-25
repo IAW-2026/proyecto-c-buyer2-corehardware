@@ -2,48 +2,21 @@
  * shipmentService.ts — Servicio para consumir la Shipping App
  *
  * ARQUITECTURA:
- *   Frontend → shipmentService → /api/shipping/... (mock interno, Etapa 2)
- *                             → SHIPPING_API_URL/... (app de Matias, Etapa 3)
- *
- * Para pasar a Etapa 3: definir NEXT_PUBLIC_SHIPPING_API_URL en .env.local
+ *   Browser → shipmentService → /api/shipping/... (proxy interno)
+ *   El proxy interno llama a la Shipping App real con la API key,
+ *   que vive solo en el servidor y nunca se expone al browser.
  */
 
 // ─────────────────────────────────────────────
 // Tipos — según contrato 03-apis.md
 // ─────────────────────────────────────────────
 export interface Shipment {
-  id: number
-  pedido_id: number
+  id: string
+  pedido_id: string
   fecha_de_entrega: string
   estado: string
   monto: number
   direccion: string
-}
-
-// ─────────────────────────────────────────────
-// Helper de routing
-// ─────────────────────────────────────────────
-function getShippingBaseUrl(): string {
-  if (process.env.NEXT_PUBLIC_SHIPPING_API_URL) {
-    return process.env.NEXT_PUBLIC_SHIPPING_API_URL
-  }
-  if (typeof window !== 'undefined') {
-    return `${window.location.origin}/api/shipping`
-  }
-  // Server-side: necesita URL absoluta
-  if (process.env.VERCEL_URL) {
-    return `https://${process.env.VERCEL_URL}/api/shipping`
-  }
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'
-  return `${appUrl}/api/shipping`
-}
-
-function getHeaders(): HeadersInit {
-  const apiKey = process.env.NEXT_PUBLIC_SHIPPING_API_KEY
-  return {
-    'Content-Type': 'application/json',
-    ...(apiKey ? { 'X-API-Key': apiKey } : {}),
-  }
 }
 
 // ─────────────────────────────────────────────
@@ -59,12 +32,9 @@ export const ShipmentService = {
    *   Response 200: { id, pedido_id, fecha_de_entrega, estado, monto, direccion }
    *   Response 404: { message }
    */
-  async getShipmentById(id: number): Promise<Shipment | null> {
-    const base = getShippingBaseUrl()
-
-    const response = await fetch(`${base}/shipment/${id}`, {
+  async getShipmentById(id: string): Promise<Shipment | null> {
+    const response = await fetch(`/api/shipping/shipment/${id}`, {
       method: 'GET',
-      headers: getHeaders(),
     })
 
     if (response.status === 404) return null

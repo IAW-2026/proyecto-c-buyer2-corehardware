@@ -9,9 +9,9 @@ interface CartContextType {
   items: CartItem[]
   loading: boolean
   agregar: (producto: ProductSummary) => Promise<void>
-  remover: (id: number) => Promise<void>
-  incrementarCantidad: (id: number) => Promise<void>
-  decrementarCantidad: (id: number) => Promise<void>
+  remover: (id: string) => Promise<void>
+  incrementarCantidad: (id: string) => Promise<void>
+  decrementarCantidad: (id: string) => Promise<void>
   limpiarCarrito: () => Promise<void>
   totalItems: number
   subtotalProductos: number
@@ -129,7 +129,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     }
   }
 
-  const remover = async (id: number) => {
+  const remover = async (id: string) => {
     if (!isSignedIn) {
       setItems(prev => prev.filter(i => i.id !== id))
       return
@@ -144,7 +144,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     }
   }
 
-  const incrementarCantidad = async (id: number) => {
+  const incrementarCantidad = async (id: string) => {
     if (!isSignedIn) {
       setItems(prev => prev.map(i => i.id === id ? { ...i, cantidad: i.cantidad + 1 } : i))
       return
@@ -164,7 +164,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     }
   }
 
-  const decrementarCantidad = async (id: number) => {
+  const decrementarCantidad = async (id: string) => {
     if (!isSignedIn) {
       setItems(prev => prev.map(i => i.id === id && i.cantidad > 1 ? { ...i, cantidad: i.cantidad - 1 } : i))
       return

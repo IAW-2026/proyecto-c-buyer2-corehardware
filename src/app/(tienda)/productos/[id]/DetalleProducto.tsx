@@ -10,7 +10,7 @@ import { Product } from '@/types/producto'
 export default function DetalleProducto({ producto }: { producto: Product }) {
   return (
     <Box bg="brand.bgMain" minH="100vh" color="brand.textMain">
-      <BackButton />
+      <BackButton href="/productos" />
 
       <Box px={{ base: 4, md: 8 }} py={6}>
         <Flex direction={{ base: 'column', md: 'row' }} gap={8} align="flex-start">
