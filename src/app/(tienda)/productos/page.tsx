@@ -53,7 +53,6 @@ export default async function ProductosPage({ searchParams }: PageProps) {
   )].sort() as string[]
 
   return (
-    <Suspense fallback={<ProductosLoading />}>
       <ListadoProductos
         items={data.items}
         total={data.total}
@@ -64,6 +63,5 @@ export default async function ProductosPage({ searchParams }: PageProps) {
         todasLasMarcas={todasLasMarcas}
         todosLosVendedores={todosLosVendedores}
       />
-    </Suspense>
   )
 }

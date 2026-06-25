@@ -1,5 +1,6 @@
 'use client'
 
+import { Suspense } from 'react'
 import { useRouter, usePathname, useSearchParams } from 'next/navigation'
 import { Box, Flex, SimpleGrid } from '@chakra-ui/react'
 import { ProductosEmptyState } from '@/components/productos/ProductosEstadosClient'
@@ -21,7 +22,7 @@ interface Props {
   todosLosVendedores: string[]
 }
 
-export default function ListadoProductos({
+function ListadoProductosInner({
   items, total, offset, search, marca, vendedor,
   todasLasMarcas, todosLosVendedores,
 }: Props) {
@@ -122,5 +123,13 @@ export default function ListadoProductos({
         </Box>
       </Flex>
     </Box>
+  )
+}
+
+export default function ListadoProductos(props: Props) {
+  return (
+    <Suspense fallback={null}>
+      <ListadoProductosInner {...props} />
+    </Suspense>
   )
 }
