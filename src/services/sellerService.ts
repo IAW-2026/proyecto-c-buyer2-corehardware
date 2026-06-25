@@ -2,10 +2,9 @@
  * sellerService.ts — Servicio para consumir la Seller App
  *
  * ARQUITECTURA:
- *   Frontend → sellerService → /api/seller/... (mock interno, Etapa 2)
- *                           → SELLER_API_URL/... (app de Sebastián, Etapa 3)
- *
- * Para pasar a Etapa 3: definir NEXT_PUBLIC_SELLER_API_URL en .env.local
+ *   Browser → sellerService → /api/seller/... (proxy interno)
+ *   El proxy interno llama a la Seller App real con la API key,
+ *   que vive solo en el servidor y nunca se expone al browser.
  */
 
 import { Product, ProductSummary } from '@/types/producto'
@@ -14,7 +13,7 @@ import { Product, ProductSummary } from '@/types/producto'
 // Tipos locales
 // ─────────────────────────────────────────────
 export interface Seller {
-  id: number
+  id: string
   cuit: string
   razon_social: string
   direccion: string
@@ -29,34 +28,8 @@ export interface GetProductsParams {
   name?: string
   brand?: string
   hasStock?: boolean
-  sellerId?: number
+  sellerId?: string
   seller?: string
-}
-
-// ─────────────────────────────────────────────
-// Helper de routing — igual patrón que paymentService
-// ─────────────────────────────────────────────
-function getSellerBaseUrl(): string {
-  if (process.env.NEXT_PUBLIC_SELLER_API_URL) {
-    return process.env.NEXT_PUBLIC_SELLER_API_URL
-  }
-  if (typeof window !== 'undefined') {
-    return `${window.location.origin}/api/seller`
-  }
-  // Server-side
-  if (process.env.VERCEL_URL) {
-    return `https://${process.env.VERCEL_URL}/api/seller`
-  }
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'
-  return `${appUrl}/api/seller`
-}
-
-function getHeaders(): HeadersInit {
-  const apiKey = process.env.NEXT_PUBLIC_SELLER_API_KEY
-  return {
-    'Content-Type': 'application/json',
-    ...(apiKey ? { 'X-API-Key': apiKey } : {}),
-  }
 }
 
 // ─────────────────────────────────────────────
@@ -66,30 +39,24 @@ export const SellerService = {
 
   /**
    * GET /products — lista paginada con filtros
+   * Contrato (03-apis.md): offset, limit, name, brand, hasStock, sellerId, seller
    */
   async getProducts(
     params: GetProductsParams
   ): Promise<{ items: ProductSummary[]; total: number }> {
     const { offset, limit, name, brand, hasStock, sellerId, seller } = params
-    const base = getSellerBaseUrl()
 
-    const url = new URL(`${base}/products`, 'http://localhost') // base ficticia para parsear params
-    url.searchParams.set('offset', offset.toString())
-    url.searchParams.set('limit', limit.toString())
-    if (name)     url.searchParams.set('name', name)
-    if (brand)    url.searchParams.set('brand', brand)
-    if (hasStock) url.searchParams.set('hasStock', 'true')
-   if (params.sellerId) url.searchParams.set('sellerId', params.sellerId.toString())
-    if (seller)   url.searchParams.set('seller', seller)
+    const searchParams = new URLSearchParams()
+    searchParams.set('offset', offset.toString())
+    searchParams.set('limit', limit.toString())
+    if (name)     searchParams.set('name', name)
+    if (brand)    searchParams.set('brand', brand)
+    if (hasStock) searchParams.set('hasStock', 'true')
+    if (sellerId) searchParams.set('sellerId', sellerId)
+    if (seller)   searchParams.set('seller', seller)
 
-    // Reconstruimos solo el path+query para fetch relativo o absoluto
-    const fetchUrl = base.startsWith('http')
-      ? url.toString()
-      : `${base}/products?${url.searchParams.toString()}`
-
-    const response = await fetch(fetchUrl, {
+    const response = await fetch(`/api/seller/products?${searchParams.toString()}`, {
       method: 'GET',
-      headers: getHeaders(),
     })
 
     if (response.status === 204) return { items: [], total: 0 }
@@ -105,13 +72,11 @@ export const SellerService = {
 
   /**
    * GET /products/:id — detalle de un producto
+   * Contrato (03-apis.md): Response 200 con datos completos del producto
    */
-  async getProductById(id: number): Promise<Product | null> {
-    const base = getSellerBaseUrl()
-
-    const response = await fetch(`${base}/products/${id}`, {
+  async getProductById(id: string): Promise<Product | null> {
+    const response = await fetch(`/api/seller/products/${id}`, {
       method: 'GET',
-      headers: getHeaders(),
     })
 
     if (response.status === 404) return null
@@ -122,13 +87,11 @@ export const SellerService = {
 
   /**
    * GET /sellers/:id — datos de un vendedor
+   * Contrato (03-apis.md): Response 200 con datos completos del vendedor
    */
-  async getSellerById(id: number): Promise<Seller | null> {
-    const base = getSellerBaseUrl()
-
-    const response = await fetch(`${base}/sellers/${id}`, {
+  async getSellerById(id: string): Promise<Seller | null> {
+    const response = await fetch(`/api/seller/sellers/${id}`, {
       method: 'GET',
-      headers: getHeaders(),
     })
 
     if (response.status === 404) return null
