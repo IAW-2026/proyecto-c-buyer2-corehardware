@@ -1,11 +1,11 @@
 import { auth } from '@clerk/nextjs/server'
 import { redirect } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
-import { Box, Container, Flex, Text, VStack, Icon } from '@chakra-ui/react'
-import { FaUsers } from 'react-icons/fa'
+import { Box, Container, Flex, Text, VStack } from '@chakra-ui/react'
 import BuscadorCompradores from '@/components/admin/BuscadorCompradores'
 import BuyerRow from '@/components/admin/BuyerRow'
 import CompradoresPaginacion from '@/components/admin/CompradoresPaginacion'
+import { EmptyStateCompradores } from '@/components/admin/MedalIcon'
 
 const LIMIT = 10
 
@@ -75,12 +75,7 @@ export default async function CompradoresPage({ searchParams }: PageProps) {
 
       <Box bg="brand.bgCard" border="1px solid" borderColor="brand.border" borderRadius="xl" overflow="hidden" as="section" aria-label="Listado de compradores">
         {items.length === 0 ? (
-          <Flex direction="column" align="center" py={16} gap={3}>
-            <Icon as={FaUsers} boxSize={8} color="brand.textMuted" />
-            <Text color="brand.textMuted">
-              {search ? 'No hay compradores con esa búsqueda.' : 'No hay compradores todavía.'}
-            </Text>
-          </Flex>
+          <EmptyStateCompradores search={search} />
         ) : (
           <Box overflowX="auto">
             <Box as="table" w="full" role="table" aria-label="Listado de compradores">

@@ -1,7 +1,7 @@
 'use client'
 
 import { Flex, Icon, Text } from '@chakra-ui/react'
-import { FaMedal, FaChartBar } from 'react-icons/fa'
+import { FaMedal, FaChartBar, FaUsers } from 'react-icons/fa'
 import { MEDAL_COLORS } from '@/utils/adminUtils'
 
 export function EmptyState() {
@@ -21,6 +21,17 @@ export default function MedalIcon({ posicion }: { posicion: number }) {
       ) : (
         <Text fontSize="sm" color="brand.textMuted" fontFamily="mono">{posicion}</Text>
       )}
+    </Flex>
+  )
+}
+
+export function EmptyStateCompradores({ search }: { search: string }) {
+  return (
+    <Flex direction="column" align="center" py={16} gap={3}>
+      <Icon as={FaUsers} boxSize={8} color="brand.textMuted" />
+      <Text color="brand.textMuted">
+        {search ? 'No hay compradores con esa búsqueda.' : 'No hay compradores todavía.'}
+      </Text>
     </Flex>
   )
 }
