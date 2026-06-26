@@ -76,15 +76,17 @@ export const AddToCartButton = memo(function AddToCartButton({
   if (vendedorDistinto) {
     return (
       <Box
-        w="full" py={3}
-        bg="brand.bgCard"
-        border="1px solid" borderColor="brand.border"
+        w="full" py={3} px={4}
+        bg="rgba(248,81,73,0.08)"
+        border="1px solid" borderColor="brand.danger"
         borderRadius="lg" textAlign="center"
-        cursor="not-allowed" opacity={0.6}
+        cursor="not-allowed"
         aria-disabled="true"
         title="Tu carrito tiene productos de otro vendedor"
       >
-        <Text fontSize="sm" color="brand.textMuted">Vendedor distinto</Text>
+        <Text fontSize="sm" color="brand.danger" fontWeight="semibold">
+          Vendedor distinto
+        </Text>
       </Box>
     )
   }
@@ -92,14 +94,16 @@ export const AddToCartButton = memo(function AddToCartButton({
   if (producto.stock === 0) {
     return (
       <Box
-        w="full" py={3}
-        bg="brand.bgCard"
-        border="1px solid" borderColor="brand.border"
+        w="full" py={3} px={4}
+        bg="rgba(160,160,160,0.08)"
+        border="1px solid" borderColor="gray.600"
         borderRadius="lg" textAlign="center"
-        cursor="not-allowed" opacity={0.5}
+        cursor="not-allowed"
         aria-disabled="true"
       >
-        <Text fontSize="sm" color="brand.textMuted">Sin stock</Text>
+        <Text fontSize="sm" color="gray.400" fontWeight="semibold">
+          Sin stock
+        </Text>
       </Box>
     )
   }

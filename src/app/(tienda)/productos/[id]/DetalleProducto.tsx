@@ -1,19 +1,25 @@
+'use client'
 import {
   Box, Flex, Text, Heading, Badge,
   VStack, HStack, Image
 } from '@chakra-ui/react'
 import { FaBox, FaShieldAlt } from 'react-icons/fa'
-import { BackButton } from '@/components/ui/BackButton'
 import { AddToCartButton } from '@/components/ui/AddToCartButton'
+import { BackButton } from '@/components/ui/BackButton'
 import { Product } from '@/types/producto'
+import { formatPrecio } from '@/utils/formatPrecio'
 
-export default function DetalleProducto({ producto }: { producto: Product }) {
+interface Props {
+  producto: Product
+}
+
+export default function DetalleProducto({ producto }: Props) {
   return (
     <Box bg="brand.bgMain" minH="100vh" color="brand.textMain">
-      <BackButton href="/productos" />
-
       <Box px={{ base: 4, md: 8 }} py={6}>
-        <Flex direction={{ base: 'column', md: 'row' }} gap={8} align="flex-start">
+        <BackButton href="/productos" />
+
+        <Flex direction={{ base: 'column', md: 'row' }} gap={8} align="flex-start" mt={4}>
 
           {/* IMAGEN */}
           <Box
@@ -44,7 +50,7 @@ export default function DetalleProducto({ producto }: { producto: Product }) {
               px={3} py={1}
               borderRadius="md"
               fontWeight="black"
-              fontSize="xs"
+              fontSize="sm"
             >
               {producto.marca?.toUpperCase() || 'GENERIC'}
             </Badge>
@@ -54,21 +60,21 @@ export default function DetalleProducto({ producto }: { producto: Product }) {
             </Heading>
 
             {producto.modelo && (
-              <Text color="brand.textMuted" fontSize="sm">
+              <Text color="brand.textMuted" fontSize="md">
                 Modelo: {producto.modelo}
               </Text>
             )}
 
-            <Text fontSize="3xl" fontWeight="black" color="brand.textMain">
-              ${producto.precio?.toLocaleString('es-AR')}
+            <Text fontSize="4xl" fontWeight="black" color="brand.textMain">
+              {formatPrecio(producto.precio)}
             </Text>
 
             <HStack>
               <FaBox color="brand.textMuted" />
               <Text
-                color={producto.stock > 0 ? "brand.accent" : 'red.400'}
+                color={producto.stock > 0 ? 'brand.accent' : 'red.400'}
                 fontWeight="bold"
-                fontSize="sm"
+                fontSize="md"
               >
                 {producto.stock > 0
                   ? `${producto.stock} unidades disponibles`
@@ -77,7 +83,7 @@ export default function DetalleProducto({ producto }: { producto: Product }) {
             </HStack>
 
             {producto.vendedor && (
-              <Text color="brand.textMuted" fontSize="sm">
+              <Text color="brand.textMuted" fontSize="md">
                 Vendido por:{' '}
                 <Text as="span" color="brand.accent" fontWeight="bold">
                   {producto.vendedor}
@@ -85,7 +91,7 @@ export default function DetalleProducto({ producto }: { producto: Product }) {
               </Text>
             )}
 
-            <Box mt={4}>
+            <Box mt={4} w="full" maxW="320px">
               <AddToCartButton producto={producto} isDetailView={true} />
             </Box>
           </VStack>
@@ -96,14 +102,18 @@ export default function DetalleProducto({ producto }: { producto: Product }) {
           {producto.descripcion && (
             <Box bg="brand.bgCard" borderRadius="xl" border="1px solid" borderColor="brand.border" p={6}>
               <Heading as="h2" size="md" color="brand.accent" mb={3}>Descripción</Heading>
-              <Text color="brand.textMuted" lineHeight="1.8">{producto.descripcion}</Text>
+              <Text color="brand.textMuted" fontSize="md" lineHeight="1.8">
+                {producto.descripcion}
+              </Text>
             </Box>
           )}
 
           {producto.especificaciones && (
             <Box bg="brand.bgCard" borderRadius="xl" border="1px solid" borderColor="brand.border" p={6}>
               <Heading as="h2" size="md" color="brand.accent" mb={3}>Especificaciones</Heading>
-              <Text color="brand.textMuted" lineHeight="1.8" whiteSpace="pre-line">{producto.especificaciones}</Text>
+              <Text color="brand.textMuted" fontSize="md" lineHeight="1.8" whiteSpace="pre-line">
+                {producto.especificaciones}
+              </Text>
             </Box>
           )}
 
@@ -113,7 +123,9 @@ export default function DetalleProducto({ producto }: { producto: Product }) {
                 <FaShieldAlt color="brand.accent" />
                 <Heading as="h2" size="md" color="brand.accent">Garantía</Heading>
               </HStack>
-              <Text color="brand.textMuted">{producto.garantia}</Text>
+              <Text color="brand.textMuted" fontSize="md">
+                {producto.garantia}
+              </Text>
             </Box>
           )}
         </Box>

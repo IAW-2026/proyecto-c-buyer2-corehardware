@@ -42,7 +42,12 @@ export default async function SeguimientoEnvioPage({ searchParams }: PageProps) 
     )
   }
 
-  const envio = await fetchShipmentById(envioId)
+  let envio = null
+  try {
+    envio = await fetchShipmentById(envioId)
+  } catch (err) {
+    console.error('[SeguimientoEnvio] fetchShipmentById falló:', err)
+  }
 
   let pedido: Pedido | null = null
   if (pedidoId) {
@@ -50,17 +55,24 @@ export default async function SeguimientoEnvioPage({ searchParams }: PageProps) 
     if (comprador) {
       const pedidoDB = await prisma.pedido.findUnique({ where: { id: pedidoId } })
       if (pedidoDB && pedidoDB.compradorId === comprador.id) {
-        const vendedor = await fetchSellerById(pedidoDB.vendedorId)
+        let vendedorNombre: string | null = null
+        try {
+          const vendedor = await fetchSellerById(pedidoDB.vendedorId)
+          vendedorNombre = vendedor?.razon_social ?? null
+        } catch (err) {
+          console.error('[SeguimientoEnvio] fetchSellerById falló:', err)
+        }
+
         pedido = {
-          id:              pedidoDB.id,
-          fecha:           pedidoDB.fecha.toISOString(),
-          comprador_id:    pedidoDB.compradorId,
-          vendedor_id:     pedidoDB.vendedorId,
-          vendedor_nombre: vendedor?.razon_social ?? null,
-          productos:       pedidoDB.productosId,
-          monto:           pedidoDB.monto,
-          estado:          pedidoDB.estado as Pedido['estado'],
-          envio_id:        pedidoDB.envioId ?? null,
+          id: pedidoDB.id,
+          fecha: pedidoDB.fecha.toISOString(),
+          comprador_id: pedidoDB.compradorId,
+          vendedor_id: pedidoDB.vendedorId,
+          vendedor_nombre: vendedorNombre,
+          productos: pedidoDB.productosId,
+          monto: pedidoDB.monto,
+          estado: pedidoDB.estado as Pedido['estado'],
+          envio_id: pedidoDB.envioId ?? null,
         }
       }
     }
