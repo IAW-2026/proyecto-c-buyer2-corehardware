@@ -1,3 +1,5 @@
+'use client'
+
 import {
   Box, Flex, Grid, VStack, Text, Icon
 } from '@chakra-ui/react'
@@ -30,7 +32,6 @@ export function SeguimientoSection({ envio, pedidoId }: SeguimientoSectionProps)
           #{envio.id}
         </Text>
       </Flex>
-
       <Grid templateColumns="1fr 1fr" gap={3} mb={4}>
         <VStack align="start" gap={0}>
           <Flex align="center" gap={1.5} mb={0.5}>
@@ -56,7 +57,6 @@ export function SeguimientoSection({ envio, pedidoId }: SeguimientoSectionProps)
           </Text>
         </VStack>
       </Grid>
-
       <SeguimientoButton pedidoId={pedidoId} envioId={envio.id} />
     </Box>
   )

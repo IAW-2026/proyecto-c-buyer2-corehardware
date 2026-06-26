@@ -7,6 +7,7 @@ import Pagination from '@/components/Pagination'
 import ProductoCard from '@/components/productos/ProductCard'
 import FiltrosProductos from '@/components/productos/FiltrosProductos'
 import { ProductSummary } from '@/types/producto'
+import Image from 'next/image'
 
 const LIMIT = 20
 
@@ -32,8 +33,8 @@ export default function ListadoProductos({
 
   const actualizarURL = (nuevosParams: Record<string, string>) => {
     const current = new URLSearchParams()
-    if (search)   current.set('search', search)
-    if (marca)    current.set('marca', marca)
+    if (search) current.set('search', search)
+    if (marca) current.set('marca', marca)
     if (vendedor) current.set('vendedor', vendedor)
 
     Object.entries(nuevosParams).forEach(([key, value]) => {
@@ -84,10 +85,13 @@ export default function ListadoProductos({
           tabIndex={0}
           onKeyDown={(e) => e.key === 'Enter' && router.push('/productos')}
         >
-          <img
+          <Image
             src="/images/banner-envio-gratis.png"
             alt="Envío gratis superando los $500.000"
+            width={1200}
+            height={200}
             style={{ width: '100%', height: 'auto', display: 'block' }}
+            priority
           />
         </Box>
       </Box>
