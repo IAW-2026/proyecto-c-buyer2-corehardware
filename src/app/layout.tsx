@@ -17,7 +17,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       afterSignOutUrl="/productos"
     >
       <html lang="es" suppressHydrationWarning>
-        <body>
+        <body suppressHydrationWarning>  {/* ← agregá esto */}
           <Providers>
             {children}
             <Toaster />
