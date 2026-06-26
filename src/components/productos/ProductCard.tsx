@@ -5,15 +5,28 @@ import {
 } from '@chakra-ui/react'
 import { useRouter } from 'next/navigation'
 import { ProductSummary } from '@/types/producto'
-import { AddToCartButton } from '@/components/ui/AddToCartButton'
-import { CartBadge } from '@/components/productos/CartBadge'
+import dynamic from 'next/dynamic'
+import { formatPrecio } from '@/utils/formatPrecio'
+
+const AddToCartButton = dynamic(
+  async () => {
+    const mod = await import('@/components/ui/AddToCartButton')
+    return mod.AddToCartButton
+  },
+  { ssr: false }
+)
+
+const CartBadge = dynamic(
+  async () => {
+    const mod = await import('@/components/productos/CartBadge')
+    return mod.CartBadge
+  },
+  { ssr: false }
+)
 
 interface ProductCardProps {
   producto: ProductSummary
 }
-
-const formatPrecio = (precio: number): string =>
-  '$\u00A0' + Math.round(precio).toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.')
 
 export default function ProductoCard({ producto }: ProductCardProps) {
   const router = useRouter()
