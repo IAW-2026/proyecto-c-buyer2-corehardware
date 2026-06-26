@@ -4,7 +4,6 @@ import { Box, Container, Flex, Grid, Text, VStack, Icon } from '@chakra-ui/react
 import { FaExclamationCircle, FaMapMarkerAlt, FaCalendarAlt, FaBox, FaArrowLeft } from 'react-icons/fa'
 import { BackButton } from '@/components/ui/BackButton'
 import { SkipLink } from '@/components/ui/SkipLink'
-import { EstadoEnvioHeader } from '@/components/seguimiento/EstadoEnvioHeader'
 import { Pedido } from '@/types/pedido'
 import { Shipment } from '@/services/shipmentService'
 import { formatMonto } from '@/utils/pedidoUtils'
@@ -65,8 +64,6 @@ export function SeguimientoContent({ envio, pedido, pedidoId, envioId }: Props) 
               <Text fontWeight="bold" color="brand.textMain" fontSize="lg" fontFamily="mono">#{envio.id}</Text>
             </VStack>
           </Flex>
-
-          <EstadoEnvioHeader estado={envio.estado} />
 
           <Box as="section" aria-labelledby="detalles-heading" bg="brand.bgCard" border="1px solid" borderColor="brand.border" borderRadius="xl" p={5} mb={4}>
             <Text id="detalles-heading" fontSize="xs" color="brand.textMuted" textTransform="uppercase" letterSpacing="wider" mb={4}>

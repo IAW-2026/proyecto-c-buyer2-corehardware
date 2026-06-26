@@ -135,7 +135,6 @@ export default function PedidoDetallePage({ pedido, productos, envio }: Props) {
           <SeguimientoSection
             envio={envio}
             pedidoId={pedido.id}
-            estadoPedido={pedido.estado}
           />
         )}
 
