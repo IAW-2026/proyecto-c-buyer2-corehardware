@@ -5,7 +5,13 @@ import { es } from 'date-fns/locale'
 const TZ = 'America/Argentina/Buenos_Aires'
 
 function toBA(fecha: string): Date {
-  return toZonedTime(new Date(fecha), TZ)
+  if (process.env.NODE_ENV === 'development') {
+    console.log('[toBA] input:', fecha)
+  }
+  const normalized = fecha.endsWith('Z') || /[+-]\d{2}:\d{2}$/.test(fecha)
+    ? fecha
+    : fecha + 'Z'
+  return toZonedTime(new Date(normalized), TZ)
 }
 
 export function formatFecha(fecha: string): string {
