@@ -52,5 +52,6 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
     ? await fetchShipmentById(pedido.envio_id)
     : null
 
+  console.log('[PedidoDetalle] envio_id:', pedidoDB.envioId, '| envio:', JSON.stringify(envio))
   return <PedidoDetallePage pedido={pedido} productos={productos} envio={envio} />
 }

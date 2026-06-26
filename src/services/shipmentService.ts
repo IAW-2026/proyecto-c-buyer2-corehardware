@@ -23,7 +23,13 @@ export async function fetchShipmentById(id: string): Promise<Shipment | null> {
     cache: 'no-store',
   })
 
-  if (!res.ok) return null
+  console.log(`[fetchShipmentById] id: ${id} | status: ${res.status} | url: ${shippingUrl}/api/shipment/${id}`)
+
+  if (!res.ok) {
+    const body = await res.text()
+    console.log(`[fetchShipmentById] error body:`, body)
+    return null
+  }
   return res.json()
 }
 
