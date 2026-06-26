@@ -1,23 +1,6 @@
-/**
- * sellerService.ts — Servicio para consumir la Seller App
- *
- * ARQUITECTURA:
- *   Browser  → fetch('/api/seller/...') → proxy interno → Seller App
- *   Servidor → fetchSellerDirect(...)   → Seller App directamente
- *
- * Las funciones del objeto SellerService usan rutas relativas y solo
- * deben llamarse desde el cliente (Client Components, CartContext, etc.)
- *
- * fetchSellerProducts / fetchSellerProductById son para Server Components.
- */
-
 import { Product, ProductSummary } from '@/types/producto'
-import { getSellerHeaders, isMockMode } from '@/lib/apiHelpers'
-import { MOCK_PRODUCTS_SUMMARY } from '@/data/mockProducts'
+import { getSellerHeaders } from '@/lib/apiHelpers'
 
-// ─────────────────────────────────────────────
-// Tipos locales
-// ─────────────────────────────────────────────
 export interface Seller {
   id: string
   cuit: string
@@ -39,34 +22,12 @@ export interface GetProductsParams {
 }
 
 // ─────────────────────────────────────────────
-// SERVER-SIDE: llamada directa a la Seller App
-// Solo usar desde Server Components o Route Handlers
+// SERVER-SIDE
 // ─────────────────────────────────────────────
 
 export async function fetchSellerProducts(
   params: URLSearchParams
 ): Promise<{ items: ProductSummary[]; total: number }> {
-  if (isMockMode()) {
-    const name     = params.get('name')?.toLowerCase()
-    const brand    = params.get('brand')?.toLowerCase()
-    const hasStock = params.get('hasStock') === 'true'
-    const offset   = Number(params.get('offset') ?? '0')
-    const limit    = Number(params.get('limit') ?? '10')
-
-    let items = [...MOCK_PRODUCTS_SUMMARY]
-    if (name)     items = items.filter((p) => p.nombre.toLowerCase().includes(name))
-    if (brand)    items = items.filter((p) => p.marca.toLowerCase().includes(brand))
-    if (hasStock) items = items.filter((p) => p.stock > 0)
-
-    const total = items.length
-    const page  = items.slice(offset, offset + limit).map((p) => ({
-      ...p,
-      id:         String(p.id),
-      vendedorId: String(p.vendedorId),
-    }))
-    return { items: page as ProductSummary[], total }
-  }
-
   const sellerUrl = process.env.SELLER_API_URL
   if (!sellerUrl) throw new Error('SELLER_API_URL no configurada')
 
@@ -83,11 +44,6 @@ export async function fetchSellerProducts(
 }
 
 export async function fetchSellerById(id: string): Promise<{ razon_social: string } | null> {
-  if (isMockMode()) {
-    // importá tus mocks si tenés mockSellers, si no retorná null
-    return null
-  }
-
   const sellerUrl = process.env.SELLER_API_URL
   if (!sellerUrl) throw new Error('SELLER_API_URL no configurada')
 
@@ -101,8 +57,6 @@ export async function fetchSellerById(id: string): Promise<{ razon_social: strin
 }
 
 export async function fetchSellerProductById(id: string): Promise<Product | null> {
-  if (isMockMode()) return null
-
   const sellerUrl = process.env.SELLER_API_URL
   if (!sellerUrl) throw new Error('SELLER_API_URL no configurada')
 
@@ -116,16 +70,14 @@ export async function fetchSellerProductById(id: string): Promise<Product | null
 }
 
 // ─────────────────────────────────────────────
-// CLIENT-SIDE: proxy interno (sin API key expuesta)
-// Solo usar desde Client Components
+// CLIENT-SIDE
 // ─────────────────────────────────────────────
-export const SellerService = {
 
+export const SellerService = {
   async getProducts(
     params: GetProductsParams
   ): Promise<{ items: ProductSummary[]; total: number }> {
     const { offset, limit, name, brand, hasStock, sellerId, seller } = params
-
     const searchParams = new URLSearchParams()
     searchParams.set('offset', offset.toString())
     searchParams.set('limit', limit.toString())
@@ -136,11 +88,9 @@ export const SellerService = {
     if (seller)   searchParams.set('seller', seller)
 
     const response = await fetch(`/api/seller/products?${searchParams.toString()}`)
-
     if (response.status === 204) return { items: [], total: 0 }
     if (response.status === 404) return { items: [], total: 0 }
     if (!response.ok) throw new Error(`Error al obtener productos: ${response.status}`)
-
     const data = await response.json()
     return {
       items: data.items ?? data,
@@ -161,5 +111,4 @@ export const SellerService = {
     if (!response.ok) throw new Error(`Error al obtener vendedor ${id}: ${response.status}`)
     return response.json()
   },
-
 }

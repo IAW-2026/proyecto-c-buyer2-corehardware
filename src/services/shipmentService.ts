@@ -1,5 +1,3 @@
-import { getShippingHeaders } from '@/lib/apiHelpers'
-
 export interface Shipment {
   id: string
   pedido_id: string
@@ -10,8 +8,7 @@ export interface Shipment {
 }
 
 // ─────────────────────────────────────────────
-// SERVER-SIDE: llamada directa a la Shipping App
-// Solo usar desde Server Components o Route Handlers
+// SERVER-SIDE
 // ─────────────────────────────────────────────
 
 export async function fetchShipmentById(id: string): Promise<Shipment | null> {
@@ -19,23 +16,16 @@ export async function fetchShipmentById(id: string): Promise<Shipment | null> {
   if (!shippingUrl) throw new Error('SHIPPING_API_URL no configurada')
 
   const res = await fetch(`${shippingUrl}/api/shipment/${id}`, {
-    headers: getShippingHeaders(),
+    headers: { 'x-api-key': process.env.SHIPPING_API_KEY ?? '' },
     cache: 'no-store',
   })
 
-  console.log(`[fetchShipmentById] id: ${id} | status: ${res.status} | url: ${shippingUrl}/api/shipment/${id}`)
-
-  if (!res.ok) {
-    const body = await res.text()
-    console.log(`[fetchShipmentById] error body:`, body)
-    return null
-  }
+  if (!res.ok) return null
   return res.json()
 }
 
 // ─────────────────────────────────────────────
-// CLIENT-SIDE: proxy interno
-// Solo usar desde Client Components
+// CLIENT-SIDE
 // ─────────────────────────────────────────────
 
 export const ShipmentService = {
