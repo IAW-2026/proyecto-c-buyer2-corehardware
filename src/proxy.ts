@@ -1,5 +1,5 @@
 import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server'
-import { NextResponse } from 'next/server'
+import { NextResponse, type NextRequest } from 'next/server'
 
 const isPublicRoute = createRouteMatcher([
   '/',
@@ -12,6 +12,7 @@ const isPublicRoute = createRouteMatcher([
   '/api/buyers(.*)',
   '/api/seller(.*)',
   '/api/shipping(.*)',
+  '/api/auth/role',
 ])
 
 const isAdminRoute = createRouteMatcher(['/dashboard(.*)'])
@@ -28,10 +29,35 @@ const isBuyerRoute = createRouteMatcher([
 
 const isProfileRoute = createRouteMatcher(['/completar-perfil(.*)'])
 
+// Helper: confirma el rol pegándole directo a Clerk server-side (no al JWT),
+// para los casos en que sessionClaims todavía no tiene el metadata fresco.
+async function resolveRole(request: NextRequest): Promise<string | undefined> {
+  try {
+    const res = await fetch(new URL('/api/auth/role', request.url), {
+      headers: { cookie: request.headers.get('cookie') ?? '' },
+    })
+    if (!res.ok) return undefined
+    const { role } = await res.json()
+    return role ?? undefined
+  } catch {
+    return undefined
+  }
+}
+
+async function checkPerfilCompleto(request: NextRequest): Promise<boolean | null> {
+  const checkUrl = new URL('/api/perfil/check', request.url)
+  const res = await fetch(checkUrl, {
+    headers: { cookie: request.headers.get('cookie') ?? '' },
+  })
+  if (!res.ok) return null
+  const { completo } = await res.json()
+  return completo as boolean
+}
+
 export default clerkMiddleware(async (auth, request) => {
   const { userId, sessionClaims } = await auth()
   const isApi = request.nextUrl.pathname.startsWith('/api')
-  const role = (sessionClaims?.metadata as any)?.role
+  let role = (sessionClaims?.metadata as any)?.role as string | undefined
 
   // ── Sin login ──────────────────────────────────────────────
   if (!userId) {
@@ -39,7 +65,19 @@ export default clerkMiddleware(async (auth, request) => {
     return NextResponse.redirect(new URL('/sign-in', request.url))
   }
 
-  // ── Rutas de dashboard — se evalúa ANTES del redirect general ──
+  // ── API routes: no aplicamos gates de pantalla, solo dejamos pasar ──
+  if (isApi) {
+    return NextResponse.next()
+  }
+
+  // ── Rol no resuelto aún en el JWT → confirmar server-side contra Clerk ──
+  // Esto cubre el caso de un usuario recién registrado (buyer o admin)
+  // cuyo publicMetadata.role todavía no llegó al JWT de la sesión.
+  if (!role) {
+    role = await resolveRole(request)
+  }
+
+  // ── Rutas de dashboard (admin) ──────────────────────────────
   if (isAdminRoute(request)) {
     if (role !== 'admin') {
       return NextResponse.redirect(new URL('/productos', request.url))
@@ -48,35 +86,30 @@ export default clerkMiddleware(async (auth, request) => {
   }
 
   // ── Admin fuera del dashboard → redirigir al dashboard ────
-  if (!isApi && role === 'admin' && isBuyerRoute(request)) {
+  if (role === 'admin' && isBuyerRoute(request)) {
     return NextResponse.redirect(new URL('/dashboard', request.url))
   }
 
+  // ── A esta altura: usuario no-admin (buyer, o rol aún sin resolver) ──
+  // Si el rol sigue sin resolverse después del fallback, y la ruta no es
+  // de buyer ni pública, lo mandamos a /productos como destino seguro.
+  if (!role && !isBuyerRoute(request) && !isPublicRoute(request)) {
+    return NextResponse.redirect(new URL('/productos', request.url))
+  }
+
   // ── Comprador: si no completó perfil, forzar completar-perfil ─
-  if (!isApi && role !== 'admin' && !isProfileRoute(request)) {
-    const checkUrl = new URL('/api/perfil/check', request.url)
-    const res = await fetch(checkUrl, {
-      headers: { cookie: request.headers.get('cookie') ?? '' },
-    })
-    if (res.ok) {
-      const { completo } = await res.json()
-      if (!completo) {
-        return NextResponse.redirect(new URL('/completar-perfil', request.url))
-      }
+  if (role !== 'admin' && !isProfileRoute(request)) {
+    const completo = await checkPerfilCompleto(request)
+    if (completo === false) {
+      return NextResponse.redirect(new URL('/completar-perfil', request.url))
     }
   }
 
   // ── Comprador: perfil completo no necesita /completar-perfil ─
-  if (!isApi && isProfileRoute(request)) {
-    const checkUrl = new URL('/api/perfil/check', request.url)
-    const res = await fetch(checkUrl, {
-      headers: { cookie: request.headers.get('cookie') ?? '' },
-    })
-    if (res.ok) {
-      const { completo } = await res.json()
-      if (completo) {
-        return NextResponse.redirect(new URL('/productos', request.url))
-      }
+  if (isProfileRoute(request)) {
+    const completo = await checkPerfilCompleto(request)
+    if (completo === true) {
+      return NextResponse.redirect(new URL('/productos', request.url))
     }
   }
 

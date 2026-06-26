@@ -1,5 +1,3 @@
-'use client'
-
 import { Box, Flex, VStack, Text, Icon } from '@chakra-ui/react'
 import { ENVIO_PASOS, ENVIO_CONFIG, EstadoEnvio } from '@/utils/seguimientoUtils'
 

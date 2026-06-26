@@ -1,5 +1,3 @@
-'use client'
-
 import { Box, Flex, VStack, Text, Icon } from '@chakra-ui/react'
 import { EstadoPedido } from '@/types/pedido'
 import { ESTADO_CONFIG, PASOS_FLUJO } from '@/utils/pedidoUtils'

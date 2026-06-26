@@ -21,14 +21,5 @@ export async function GET() {
     return NextResponse.json({ completo: false, deleted: true })
   }
 
-  // Un perfil está completo si tiene los campos obligatorios rellenos
-  const completo =
-    comprador.dni !== '' &&
-    comprador.cuilCuit !== '' &&
-    comprador.direccion !== '' &&
-    comprador.celular !== '' &&
-    comprador.nacionalidad !== '' &&
-    comprador.fechaNacimiento.getFullYear() !== 1900
-
-  return NextResponse.json({ completo })
+  return NextResponse.json({ completo: comprador.perfilCompleto })
 }

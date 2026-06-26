@@ -1,21 +1,27 @@
+import { format } from 'date-fns'
+import { toZonedTime } from 'date-fns-tz'
+import { es } from 'date-fns/locale'
+
+const TZ = 'America/Argentina/Buenos_Aires'
+
+function toBA(fecha: string): Date {
+  if (process.env.NODE_ENV === 'development') {
+    console.log('[toBA] input:', fecha)
+  }
+  const normalized = fecha.endsWith('Z') || /[+-]\d{2}:\d{2}$/.test(fecha)
+    ? fecha
+    : fecha + 'Z'
+  return toZonedTime(new Date(normalized), TZ)
+}
+
 export function formatFecha(fecha: string): string {
-  return new Date(fecha).toLocaleDateString('es-AR', {
-    day: '2-digit', month: '2-digit', year: 'numeric',
-    timeZone: 'America/Argentina/Buenos_Aires',
-  })
+  return format(toBA(fecha), 'dd/MM/yyyy')
 }
 
 export function formatFechaConHora(fecha: string): string {
-  return new Date(fecha).toLocaleString('es-AR', {
-    day: '2-digit', month: '2-digit', year: 'numeric',
-    hour: '2-digit', minute: '2-digit',
-    timeZone: 'America/Argentina/Buenos_Aires',
-  })
+  return format(toBA(fecha), 'dd/MM/yyyy, HH:mm')
 }
 
 export function formatFechaLarga(fecha: string): string {
-  return new Date(fecha).toLocaleDateString('es-AR', {
-    day: '2-digit', month: 'long', year: 'numeric',
-    timeZone: 'America/Argentina/Buenos_Aires',
-  })
+  return format(toBA(fecha), "dd 'de' MMMM 'de' yyyy", { locale: es })
 }

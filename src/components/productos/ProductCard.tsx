@@ -1,10 +1,26 @@
 'use client'
-
 import { Box, Image, Text, HStack, Icon } from '@chakra-ui/react'
 import { FaStore } from 'react-icons/fa'
 import Link from 'next/link'
-import { AddToCartButton } from '@/components/ui/AddToCartButton'
+import dynamic from 'next/dynamic'
 import { ProductSummary } from '@/types/producto'
+import { formatPrecio } from '@/utils/formatPrecio'
+
+const AddToCartButton = dynamic(
+  async () => {
+    const mod = await import('@/components/ui/AddToCartButton')
+    return mod.AddToCartButton
+  },
+  { ssr: false }
+)
+
+const CartBadge = dynamic(
+  async () => {
+    const mod = await import('@/components/productos/CartBadge')
+    return mod.CartBadge
+  },
+  { ssr: false }
+)
 
 interface ProductoCardProps {
   producto: ProductSummary
@@ -14,12 +30,13 @@ export default function ProductoCard({ producto }: ProductoCardProps) {
   return (
     <Box
       as="article"
-      aria-label={`${producto.nombre}, $${producto.precio}`}
+      aria-label={`${producto.nombre}, ${formatPrecio(producto.precio)}`}
       bg="brand.bgCard"
       borderRadius="xl"
       overflow="hidden"
       border="1px solid"
       borderColor="brand.border"
+      position="relative"
       transition="all 0.3s ease"
       _hover={{
         transform: 'translateY(-5px)',
@@ -27,6 +44,8 @@ export default function ProductoCard({ producto }: ProductoCardProps) {
         shadow: '0 0 20px rgba(0, 209, 255, 0.15)',
       }}
     >
+      <CartBadge productoId={producto.id} />
+
       <Link href={`/productos/${producto.id}`} aria-label={`Ver detalle de ${producto.nombre}`}>
         <Box position="relative" pt="100%" bg="white">
           <Image
@@ -59,12 +78,18 @@ export default function ProductoCard({ producto }: ProductoCardProps) {
           >
             {producto.nombre}
           </Text>
-          <Text fontSize="xl" fontWeight="black" color="brand.textMain" suppressHydrationWarning>
-            ${producto.precio.toLocaleString('es-AR')}
+          <Text fontSize="xl" fontWeight="black" color="brand.textMain">
+            {formatPrecio(producto.precio)}
           </Text>
         </Box>
       </Link>
+
       <Box p={4} pt={0}>
+        {producto.stock > 0 && producto.stock <= 5 && (
+          <Text fontSize="md" color="orange.400" fontWeight="semibold" mb={2}>
+            ¡Últimas {producto.stock} unidades!
+          </Text>
+        )}
         <AddToCartButton producto={producto} />
       </Box>
     </Box>

@@ -14,7 +14,6 @@
  *   EN_CAMINO       → ENTREGADO
  *   cualquiera      → CANCELADO
  */
-
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { validateApiKey } from '@/lib/auth'
@@ -29,7 +28,6 @@ const ESTADOS_VALIDOS = [
   'CANCELADO',
 ] as const
 
-// Transiciones permitidas — evita que alguien retroceda un estado
 const TRANSICIONES: Record<string, string[]> = {
   PENDIENTE_PAGO: ['PAGO_APROBADO', 'PAGO_RECHAZADO', 'CANCELADO'],
   PAGO_APROBADO: ['EN_PREPARACION', 'CANCELADO'],
@@ -46,17 +44,14 @@ export async function PUT(
 ) {
   const { id } = await params
 
-  const pedidoId = parseInt(id)
-  if (isNaN(pedidoId) || pedidoId <= 0) {
+  if (!id || id.trim() === '') {
     return NextResponse.json({ message: 'ID de pedido inválido' }, { status: 400 })
   }
 
-  // 1. Validar API Key
   if (!validateApiKey(req)) {
     return NextResponse.json({ message: 'No autorizado' }, { status: 401 })
   }
 
-  // 2. Parsear body
   let body: { estado: string }
   try {
     body = await req.json()
@@ -66,7 +61,6 @@ export async function PUT(
 
   const { estado: nuevoEstado } = body
 
-  // 3. Validar que el estado enviado es uno de los estados conocidos
   if (!ESTADOS_VALIDOS.includes(nuevoEstado as typeof ESTADOS_VALIDOS[number])) {
     return NextResponse.json(
       { message: `Estado inválido: ${nuevoEstado}. Estados válidos: ${ESTADOS_VALIDOS.join(', ')}` },
@@ -74,38 +68,29 @@ export async function PUT(
     )
   }
 
-  // 4. Buscar el pedido
-  const pedidoActual = await prisma.pedido.findUnique({
-    where: { id: pedidoId },
-  })
-
+  const pedidoActual = await prisma.pedido.findUnique({ where: { id } })
   if (!pedidoActual) {
     return NextResponse.json({ message: 'Pedido no encontrado' }, { status: 404 })
   }
 
-  // 5. Validar que la transición es permitida
   const transicionesPermitidas = TRANSICIONES[pedidoActual.estado] ?? []
   if (!transicionesPermitidas.includes(nuevoEstado)) {
     return NextResponse.json(
-      {
-        message: `Transición inválida: no se puede pasar de ${pedidoActual.estado} a ${nuevoEstado}`,
-      },
+      { message: `Transición inválida: no se puede pasar de ${pedidoActual.estado} a ${nuevoEstado}` },
       { status: 409 }
     )
   }
 
-  // 6. Validar envio_id para estados que lo requieren
   if (['EN_CAMINO', 'ENTREGADO'].includes(nuevoEstado) && !pedidoActual.envioId) {
     return NextResponse.json(
-      { message: `No se puede pasar a ${nuevoEstado} sin un envío asignado (envio_id es null)` },
+      { message: `No se puede pasar a ${nuevoEstado} sin un envío asignado` },
       { status: 409 }
     )
   }
 
-  // 7. Actualizar el estado
   try {
     const pedidoActualizado = await prisma.pedido.update({
-      where: { id: pedidoId },
+      where: { id },
       data: { estado: nuevoEstado },
     })
 

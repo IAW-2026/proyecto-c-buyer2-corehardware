@@ -56,7 +56,7 @@ export default function CarritoPage() {
 
       const pedidoPayload = {
         fecha: new Date().toLocaleString('sv-SE', { timeZone: 'America/Argentina/Buenos_Aires' }).replace(' ', 'T'),
-        vendedorId: items[0]?.vendedorId || 1,
+        vendedorId: items[0]?.vendedorId ?? 'seller_001',
         productos: productosAplanados,
         monto: total,
       }
@@ -105,7 +105,7 @@ export default function CarritoPage() {
     >
       {/* Encabezado */}
       <Flex align="center" gap={3} mb={8}>
-        <BackButton />
+        <BackButton href="/productos" />
         <VStack align="start" gap={0}>
           <Text fontSize="xs" color="brand.textMuted" textTransform="uppercase" letterSpacing="wider">
             Compra
