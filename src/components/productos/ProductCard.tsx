@@ -12,6 +12,12 @@ interface ProductCardProps {
   producto: ProductSummary
 }
 
+const formatPrecio = (precio: number): string => {
+  const redondeado = Math.round(precio)
+  // Formatea manualmente con separador de miles punto (convención AR)
+  return '$\u00A0' + redondeado.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.')
+}
+
 export default function ProductoCard({ producto }: ProductCardProps) {
   const router = useRouter()
 
@@ -99,7 +105,7 @@ export default function ProductoCard({ producto }: ProductCardProps) {
           </Text>
 
           <Text fontSize="lg" fontWeight="black" color="brand.textMain">
-            ${producto.precio?.toLocaleString('es-AR')}
+            {producto.precio != null ? formatPrecio(producto.precio) : '—'}
           </Text>
 
           {producto.stock <= 0 && (
