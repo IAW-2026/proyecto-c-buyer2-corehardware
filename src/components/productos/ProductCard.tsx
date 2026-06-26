@@ -12,11 +12,8 @@ interface ProductCardProps {
   producto: ProductSummary
 }
 
-const formatPrecio = (precio: number): string => {
-  const redondeado = Math.round(precio)
-  // Formatea manualmente con separador de miles punto (convención AR)
-  return '$\u00A0' + redondeado.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.')
-}
+const formatPrecio = (precio: number): string =>
+  '$\u00A0' + Math.round(precio).toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.')
 
 export default function ProductoCard({ producto }: ProductCardProps) {
   const router = useRouter()
