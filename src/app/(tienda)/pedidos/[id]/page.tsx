@@ -26,10 +26,9 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
     idsUnicos.map((pid) => fetchSellerProductById(pid))
   )
 
-  // El nombre del vendedor viene en cada producto — evitamos un fetch extra a /api/sellers/:id
   const vendedorNombre = resultados.find((p) => p !== null)?.vendedor ?? null
 
-  const pedido: Pedido = {
+  let pedido: Pedido = {
     id:              pedidoDB.id,
     fecha:           pedidoDB.fecha.toISOString(),
     comprador_id:    pedidoDB.compradorId,
@@ -52,6 +51,19 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
     ? await fetchShipmentById(pedido.envio_id)
     : null
 
-  console.log('[PedidoDetalle] envio_id:', pedidoDB.envioId, '| envio:', JSON.stringify(envio))
+  // Opción B — sincronización en tiempo de lectura
+  if (envio && envio.estado !== pedido.estado) {
+    try {
+      await prisma.pedido.update({
+        where: { id: pedido.id },
+        data:  { estado: envio.estado },
+      })
+      pedido = { ...pedido, estado: envio.estado as Pedido['estado'] }
+      console.log(`[Sync] Pedido ${pedido.id} actualizado a estado: ${envio.estado}`)
+    } catch (err) {
+      console.error('[Sync] No se pudo sincronizar estado del pedido:', err)
+    }
+  }
+
   return <PedidoDetallePage pedido={pedido} productos={productos} envio={envio} />
 }
