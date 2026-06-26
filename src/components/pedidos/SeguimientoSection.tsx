@@ -10,10 +10,11 @@ import { SeguimientoButton } from './SeguimientoButton'
 interface SeguimientoSectionProps {
   envio: Shipment
   pedidoId: string
+  estadoPedido: string
 }
 
-export function SeguimientoSection({ envio, pedidoId }: SeguimientoSectionProps) {
-  const envioConfig = ENVIO_ESTADO_CONFIG[envio.estado] ?? ENVIO_ESTADO_CONFIG.pending
+export function SeguimientoSection({ envio, pedidoId, estadoPedido }: SeguimientoSectionProps) {
+  const envioConfig = ENVIO_ESTADO_CONFIG[estadoPedido] ?? ENVIO_ESTADO_CONFIG.pending
 
   return (
     <Box

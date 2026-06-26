@@ -132,7 +132,11 @@ export default function PedidoDetallePage({ pedido, productos, envio }: Props) {
 
         {/* Seguimiento */}
         {envio && (
-          <SeguimientoSection envio={envio} pedidoId={pedido.id} />
+          <SeguimientoSection
+            envio={envio}
+            pedidoId={pedido.id}
+            estadoPedido={pedido.estado}
+          />
         )}
 
       </main>
