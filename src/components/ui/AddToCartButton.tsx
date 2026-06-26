@@ -1,10 +1,11 @@
 'use client'
 
-import { memo, useState } from 'react'
+import { memo, useState, useEffect } from 'react'
 import { useCart } from '@/context/CartContext'
 import { ProductSummary } from '@/types/producto'
 import { Box, Flex, Icon, Text, Spinner } from '@chakra-ui/react'
 import { FaPlus, FaMinus, FaShoppingCart, FaTrash } from 'react-icons/fa'
+import { formatPrecio } from '@/utils/formatPrecio'
 
 interface AddToCartButtonProps {
   producto: ProductSummary
@@ -17,6 +18,9 @@ export const AddToCartButton = memo(function AddToCartButton({
 }: AddToCartButtonProps) {
   const { items, agregar, incrementarCantidad, decrementarCantidad, remover } = useCart()
   const [loading, setLoading] = useState(false)
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => { setMounted(true) }, [])
 
   const itemEnCarrito = items.find(i => i.id === producto.id)
   const cantidad = itemEnCarrito?.cantidad ?? 0
@@ -49,6 +53,25 @@ export const AddToCartButton = memo(function AddToCartButton({
   }
 
   const maxAlcanzado = cantidad >= producto.stock
+
+  // ── Render estático hasta que el cliente monta ────────────────────────────
+  if (!mounted) {
+    return (
+      <Box
+        w="full" py={3} px={4}
+        bg="brand.accent" color="brand.bgMain"
+        borderRadius="lg" textAlign="center"
+        opacity={0.7}
+        display="flex" alignItems="center" justifyContent="center"
+        gap={2}
+      >
+        <Icon as={FaShoppingCart} boxSize={3.5} />
+        <Text fontSize="sm" fontWeight="bold">Agregar al carrito</Text>
+      </Box>
+    )
+  }
+
+  // ── Renders post-mount (dependen del estado del carrito) ──────────────────
 
   if (vendedorDistinto) {
     return (
@@ -168,11 +191,11 @@ export const AddToCartButton = memo(function AddToCartButton({
         <Box mt={3}>
           <Text
             fontSize="sm" color="brand.textMuted"
-            aria-label={`Subtotal: $${(producto.precio * cantidad).toLocaleString('es-AR')}`}
+            aria-label={`Subtotal: ${formatPrecio(producto.precio * cantidad)}`}
           >
             Subtotal:{' '}
             <Text as="span" fontWeight="bold" color="brand.textMain" fontSize="md">
-              ${(producto.precio * cantidad).toLocaleString('es-AR')}
+              {formatPrecio(producto.precio * cantidad)}
             </Text>
           </Text>
         </Box>
