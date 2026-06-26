@@ -1,10 +1,9 @@
 import { auth } from '@clerk/nextjs/server'
 import { redirect } from 'next/navigation'
-import { Box, Container, Flex, Icon, Text, VStack } from '@chakra-ui/react'
-import { FaChartBar, FaMedal } from 'react-icons/fa'
+import { Box, Container, Flex, Text, VStack } from '@chakra-ui/react'
 import { getTopCompradores } from '@/lib/queries/admin'
 import { formatMonto } from '@/utils/pedidoUtils'
-import { MEDAL_COLORS } from '@/utils/adminUtils'
+import MedalIcon, { EmptyState } from '@/components/admin/MedalIcon'
 
 export default async function ReportesPage() {
   const { userId, sessionClaims } = await auth()
@@ -36,10 +35,7 @@ export default async function ReportesPage() {
         </Box>
 
         {items.length === 0 ? (
-          <Flex direction="column" align="center" py={16} gap={3}>
-            <Icon as={FaChartBar} boxSize={8} color="brand.textMuted" />
-            <Text color="brand.textMuted">No hay datos todavía.</Text>
-          </Flex>
+          <EmptyState />
         ) : (
           <Box as="table" w="full" role="table" aria-label="Top compradores por monto">
             <Box as="thead" role="rowgroup">
@@ -64,13 +60,7 @@ export default async function ReportesPage() {
                   borderBottom="1px solid" borderColor="brand.border" _last={{ borderBottom: 'none' }}
                 >
                   <Box as="td" px={4} py={3} w="48px">
-                    <Flex align="center" justify="center" w="28px" h="28px">
-                      {item.posicion <= 3 ? (
-                        <Icon as={FaMedal} color={MEDAL_COLORS[item.posicion]} boxSize={4} aria-label={`Posición ${item.posicion}`} />
-                      ) : (
-                        <Text fontSize="sm" color="brand.textMuted" fontFamily="mono">{item.posicion}</Text>
-                      )}
-                    </Flex>
+                    <MedalIcon posicion={item.posicion} />
                   </Box>
 
                   <Box as="td" px={4} py={3}>

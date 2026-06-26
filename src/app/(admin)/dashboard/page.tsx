@@ -1,4 +1,3 @@
-// app/(admin)/dashboard/page.tsx
 import { auth } from '@clerk/nextjs/server'
 import { redirect } from 'next/navigation'
 import { Container, Flex, Grid, Text, VStack } from '@chakra-ui/react'

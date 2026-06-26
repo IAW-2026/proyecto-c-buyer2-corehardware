@@ -1,22 +1,7 @@
-/**
- * PUT /api/orders/[id]/state
- *
- * Quién llama:
- *   - Payments App: cuando MercadoPago confirma/rechaza el pago
- *   - Shipping App: cuando el estado del envío cambia (EN_CAMINO, ENTREGADO)
- *
- * Autenticación: API Key (igual que el resto de endpoints inter-servicios)
- *
- * Transiciones válidas:
- *   PENDIENTE_PAGO  → PAGO_APROBADO | PAGO_RECHAZADO | CANCELADO
- *   PAGO_APROBADO   → EN_PREPARACION
- *   EN_PREPARACION  → EN_CAMINO
- *   EN_CAMINO       → ENTREGADO
- *   cualquiera      → CANCELADO
- */
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { validateApiKey } from '@/lib/auth'
+import { z } from 'zod'
 
 const ESTADOS_VALIDOS = [
   'PENDIENTE_PAGO',
@@ -29,14 +14,21 @@ const ESTADOS_VALIDOS = [
 ] as const
 
 const TRANSICIONES: Record<string, string[]> = {
-  PENDIENTE_PAGO: ['PAGO_APROBADO', 'PAGO_RECHAZADO', 'CANCELADO'],
-  PAGO_APROBADO: ['EN_PREPARACION', 'CANCELADO'],
-  PAGO_RECHAZADO: ['CANCELADO'],
-  EN_PREPARACION: ['EN_CAMINO', 'CANCELADO'],
-  EN_CAMINO: ['ENTREGADO', 'CANCELADO'],
-  ENTREGADO: [],
-  CANCELADO: [],
+  PENDIENTE_PAGO:  ['PAGO_APROBADO', 'PAGO_RECHAZADO', 'CANCELADO'],
+  PAGO_APROBADO:   ['EN_PREPARACION', 'CANCELADO'],
+  PAGO_RECHAZADO:  ['CANCELADO'],
+  EN_PREPARACION:  ['EN_CAMINO', 'CANCELADO'],
+  EN_CAMINO:       ['ENTREGADO', 'CANCELADO'],
+  ENTREGADO:       [],
+  CANCELADO:       [],
 }
+
+const statusSchema = z.object({
+  estado: z.enum(ESTADOS_VALIDOS).refine(
+    (val) => ESTADOS_VALIDOS.includes(val as typeof ESTADOS_VALIDOS[number]),
+    { message: `Estado inválido. Estados válidos: ${ESTADOS_VALIDOS.join(', ')}` }
+  ),
+})
 
 export async function PUT(
   req: NextRequest,
@@ -52,21 +44,22 @@ export async function PUT(
     return NextResponse.json({ message: 'No autorizado' }, { status: 401 })
   }
 
-  let body: { estado: string }
+  let body: unknown
   try {
     body = await req.json()
   } catch {
     return NextResponse.json({ message: 'Body inválido' }, { status: 400 })
   }
 
-  const { estado: nuevoEstado } = body
-
-  if (!ESTADOS_VALIDOS.includes(nuevoEstado as typeof ESTADOS_VALIDOS[number])) {
+  const result = statusSchema.safeParse(body)
+  if (!result.success) {
     return NextResponse.json(
-      { message: `Estado inválido: ${nuevoEstado}. Estados válidos: ${ESTADOS_VALIDOS.join(', ')}` },
+      { message: 'Datos inválidos', detalles: result.error.flatten().fieldErrors },
       { status: 400 }
     )
   }
+
+  const { estado: nuevoEstado } = result.data
 
   const pedidoActual = await prisma.pedido.findUnique({ where: { id } })
   if (!pedidoActual) {
@@ -95,19 +88,19 @@ export async function PUT(
     })
 
     return NextResponse.json({
-      id: pedidoActualizado.id,
-      estado: pedidoActualizado.estado,
-      fecha: pedidoActualizado.fecha,
+      id:           pedidoActualizado.id,
+      estado:       pedidoActualizado.estado,
+      fecha:        pedidoActualizado.fecha,
       comprador_id: pedidoActualizado.compradorId,
-      vendedor_id: pedidoActualizado.vendedorId,
-      productos: pedidoActualizado.productosId,
-      monto: pedidoActualizado.monto,
-      envio_id: pedidoActualizado.envioId,
+      vendedor_id:  pedidoActualizado.vendedorId,
+      productos:    pedidoActualizado.productosId,
+      monto:        pedidoActualizado.monto,
+      envio_id:     pedidoActualizado.envioId,
     })
   } catch {
     return NextResponse.json(
       { message: 'Error al actualizar el estado del pedido' },
-      { status: 409 }
+      { status: 500 }
     )
   }
 }
