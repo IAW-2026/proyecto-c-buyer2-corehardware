@@ -3,13 +3,20 @@
 import Link from 'next/link'
 import { useAuth } from '@clerk/nextjs'
 import { brandColors } from '@/styles/colors'
+import { useState, useEffect } from 'react'
 
 export function NotFoundViewLink() {
   const { sessionClaims, isLoaded } = useAuth()
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  if (!mounted || !isLoaded) return null
+
   const role = (sessionClaims?.metadata as any)?.role
   const isAdmin = role === 'admin'
-
-  if (!isLoaded) return null
 
   return (
     <Link
