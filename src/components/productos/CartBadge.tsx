@@ -1,6 +1,6 @@
 'use client'
 
-import { memo } from 'react'
+import { memo, useEffect, useState } from 'react'
 import { useCart } from '@/context/CartContext'
 import { Box, Text } from '@chakra-ui/react'
 
@@ -10,6 +10,12 @@ interface CartBadgeProps {
 
 export const CartBadge = memo(function CartBadge({ productoId }: CartBadgeProps) {
   const { items } = useCart()
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => { setMounted(true) }, [])
+
+  if (!mounted) return null
+
   const item = items.find(i => i.id === productoId)
   if (!item || item.cantidad === 0) return null
 
