@@ -39,12 +39,10 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
   }
 
   if (pedido.envioId !== null) {
-    console.log(`409: pedido ${id} ya tiene envioId ${pedido.envioId}`)
     return NextResponse.json({ message: 'El pedido ya tiene un envío asignado' }, { status: 409 })
   }
 
   if (pedido.estado !== 'PAGO_APROBADO') {
-    console.log(`409: pedido ${id} tiene estado ${pedido.estado}`)
     return NextResponse.json({ message: 'El pedido debe estar en estado PAGO_APROBADO' }, { status: 409 })
   }
 

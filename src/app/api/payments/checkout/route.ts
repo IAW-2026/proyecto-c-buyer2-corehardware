@@ -33,7 +33,6 @@ export async function POST(req: NextRequest) {
   // 2. Verificar Payments URL
   const paymentsUrl = process.env.PAYMENTS_API_URL
   if (!paymentsUrl) {
-    console.error('PAYMENTS_API_URL no está configurada')
     return NextResponse.json({ message: 'Error de configuración del servidor' }, { status: 500 })
   }
 
@@ -95,12 +94,6 @@ export async function POST(req: NextRequest) {
     monto,
   }
 
-  console.log('=== PAYMENTS DEBUG ===')
-  console.log('userId:', userId)
-  console.log('token:', token)
-  console.log('paymentsUrl:', paymentsUrl)
-  console.log('payload enviado:', JSON.stringify(paymentsPayload))
-
   const paymentsResponse = await fetch(`${paymentsUrl}/api/checkout`, {
     method: 'POST',
     headers: {
@@ -110,12 +103,8 @@ export async function POST(req: NextRequest) {
     body: JSON.stringify(paymentsPayload),
   })
 
-  console.log('payments status:', paymentsResponse.status)
-  console.log('payments headers:', Object.fromEntries(paymentsResponse.headers.entries()))
   const paymentsText = await paymentsResponse.text()
-  console.log('payments response body:', paymentsText)
-  console.log('=== FIN PAYMENTS DEBUG ===')
-
+ 
   // 8. Si Payments falla, cancelamos el pedido
   if (!paymentsResponse.ok) {
     await prisma.pedido.update({

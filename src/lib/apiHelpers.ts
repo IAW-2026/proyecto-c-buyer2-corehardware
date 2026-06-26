@@ -1,7 +1,3 @@
-export function isMockMode(): boolean {
-  return process.env.USE_MOCK === 'true'
-}
-
 export function getExternalApiHeaders(apiKey: string | undefined, keyName: string): HeadersInit {
   console.log(`${keyName} cargada:`, apiKey ? 'SÍ' : 'NO')
   if (!apiKey) console.error(`${keyName} no está configurada`)

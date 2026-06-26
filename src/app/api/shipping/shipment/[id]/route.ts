@@ -6,24 +6,13 @@
  *   Response 404: { message }
  */
 import { NextRequest, NextResponse } from 'next/server'
-import { getShippingHeaders, isMockMode } from '@/lib/apiHelpers'
-import { MOCK_SHIPMENTS } from '@/data/mockShipments'
+import { getShippingHeaders } from '@/lib/apiHelpers'
 
 export async function GET(
   _req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params
-
-  if (isMockMode()) {
-    const shipment = MOCK_SHIPMENTS.find((s) => String(s.id) === id)
-    if (!shipment) return NextResponse.json({ message: 'Envío no encontrado' }, { status: 404 })
-    return NextResponse.json({
-      ...shipment,
-      id: String(shipment.id),
-      pedido_id: String(shipment.pedido_id),
-    })
-  }
 
   const shippingUrl = process.env.SHIPPING_API_URL
   if (!shippingUrl) {

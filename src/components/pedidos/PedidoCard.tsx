@@ -44,7 +44,7 @@ export function PedidoCard({ pedido }: { pedido: Pedido }) {
                 <VStack align="start" gap={0}>
                     <Text fontSize="xs" color="brand.textMuted" id={`fecha-label-${pedido.id}`}>Fecha</Text>
                     <Text fontSize="sm" color="brand.textMain" fontWeight="medium">
-                        <time dateTime={pedido.fecha} aria-labelledby={`fecha-label-${pedido.id}`}>
+                        <time dateTime={pedido.fecha} aria-labelledby={`fecha-label-${pedido.id}`} suppressHydrationWarning>
                             {formatFecha(pedido.fecha)}
                         </time>
                     </Text>
@@ -76,7 +76,7 @@ export function PedidoCard({ pedido }: { pedido: Pedido }) {
                     style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'inherit', fontSize: '12px' }}
                 >
                     <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 448 512" fill="currentColor" aria-hidden="true">
-                        <path d="M438.6 278.6c12.5-12.5 12.5-32.8 0-45.3l-160-160c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L338.8 224 32 224c-17.7 0-32 14.3-32 32s14.3 32 32 32l306.7 0L233.4 393.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0l160-160z"/>
+                        <path d="M438.6 278.6c12.5-12.5 12.5-32.8 0-45.3l-160-160c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L338.8 224 32 224c-17.7 0-32 14.3-32 32s14.3 32 32 32l306.7 0L233.4 393.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0l160-160z" />
                     </svg>
                     <Text color="brand.textMuted" fontSize="xs">Ver detalle</Text>
                 </Link>

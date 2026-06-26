@@ -7,32 +7,10 @@
  *   ?offset=0&limit=10&name=...&brand=...&hasStock=true&seller=...
  */
 import { NextRequest, NextResponse } from 'next/server'
-import { getSellerHeaders, isMockMode } from '@/lib/apiHelpers'
-import { MOCK_PRODUCTS_SUMMARY } from '@/data/mockProducts'
+import { getSellerHeaders } from '@/lib/apiHelpers'
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url)
-
-  if (isMockMode()) {
-    const name     = searchParams.get('name')?.toLowerCase()
-    const brand    = searchParams.get('brand')?.toLowerCase()
-    const hasStock = searchParams.get('hasStock') === 'true'
-    const offset   = Number(searchParams.get('offset') ?? '0')
-    const limit    = Number(searchParams.get('limit') ?? '10')
-
-    let items = [...MOCK_PRODUCTS_SUMMARY]
-    if (name)     items = items.filter((p) => p.nombre.toLowerCase().includes(name))
-    if (brand)    items = items.filter((p) => p.marca.toLowerCase().includes(brand))
-    if (hasStock) items = items.filter((p) => p.stock > 0)
-
-    const total = items.length
-    const page  = items.slice(offset, offset + limit).map((p) => ({
-      ...p,
-      id:        String(p.id),
-      vendedorId: String(p.vendedorId),
-    }))
-    return NextResponse.json({ items: page, total })
-  }
 
   const sellerUrl = process.env.SELLER_API_URL
   if (!sellerUrl) {
