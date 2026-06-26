@@ -1,7 +1,6 @@
 'use client'
 
-import { Suspense } from 'react'
-import { useRouter, usePathname, useSearchParams } from 'next/navigation'
+import { useRouter, usePathname } from 'next/navigation'
 import { Box, Flex, SimpleGrid } from '@chakra-ui/react'
 import { ProductosEmptyState } from '@/components/productos/ProductosEstadosClient'
 import Pagination from '@/components/Pagination'
@@ -22,18 +21,21 @@ interface Props {
   todosLosVendedores: string[]
 }
 
-function ListadoProductosInner({
+export default function ListadoProductos({
   items, total, offset, search, marca, vendedor,
   todasLasMarcas, todosLosVendedores,
 }: Props) {
   const router = useRouter()
   const pathname = usePathname()
-  const searchParams = useSearchParams()
 
   const hayFiltrosActivos = !!(marca || vendedor)
 
   const actualizarURL = (nuevosParams: Record<string, string>) => {
-    const current = new URLSearchParams(searchParams.toString())
+    const current = new URLSearchParams()
+    if (search)   current.set('search', search)
+    if (marca)    current.set('marca', marca)
+    if (vendedor) current.set('vendedor', vendedor)
+
     Object.entries(nuevosParams).forEach(([key, value]) => {
       value ? current.set(key, value) : current.delete(key)
     })
@@ -123,13 +125,5 @@ function ListadoProductosInner({
         </Box>
       </Flex>
     </Box>
-  )
-}
-
-export default function ListadoProductos(props: Props) {
-  return (
-    <Suspense fallback={null}>
-      <ListadoProductosInner {...props} />
-    </Suspense>
   )
 }
