@@ -21,9 +21,9 @@
 ## 📋 Instrucciones de Uso
 
 1. Accedé al deploy de producción con cualquiera de los usuarios listados arriba.
-2. Los compradores (`buyer1` a `buyer6`) pueden explorar productos, realizar pedidos y hacer el seguimiento de sus envíos.
+2. Los compradores pueden explorar productos, realizar pedidos y hacer el seguimiento de sus envíos.
 3. El administrador (`admin`) tiene acceso al panel de administración con gestión completa de compradores y pedidos.
-4. La aplicación cuenta con datos precargados: compradores registrados, pedidos en distintos estados y envíos en curso, para que puedas recorrer todos los flujos sin necesidad de cargar información manualmente.
+4. La aplicación cuenta con datos precargados: comprador registrado, pedidos en distintos estados y envíos en curso, para que puedas recorrer todos los flujos sin necesidad de cargar información manualmente.
 
 ---
 
