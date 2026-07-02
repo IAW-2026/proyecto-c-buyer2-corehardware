@@ -4,6 +4,7 @@ import { Box, Container, Flex, Grid, Text, VStack, Icon } from '@chakra-ui/react
 import { FaExclamationCircle, FaMapMarkerAlt, FaCalendarAlt, FaBox, FaArrowLeft } from 'react-icons/fa'
 import { BackButton } from '@/components/ui/BackButton'
 import { SkipLink } from '@/components/ui/SkipLink'
+import { EstadoEnvioHeader } from '@/components/seguimiento/EstadoEnvioHeader'
 import { Pedido } from '@/types/pedido'
 import { Shipment } from '@/services/shipmentService'
 import { formatMonto } from '@/utils/pedidoUtils'
@@ -65,6 +66,8 @@ export function SeguimientoContent({ envio, pedido, pedidoId, envioId }: Props) 
             </VStack>
           </Flex>
 
+          <EstadoEnvioHeader estado={envio.estado} />
+
           <Box as="section" aria-labelledby="detalles-heading" bg="brand.bgCard" border="1px solid" borderColor="brand.border" borderRadius="xl" p={5} mb={4}>
             <Text id="detalles-heading" fontSize="xs" color="brand.textMuted" textTransform="uppercase" letterSpacing="wider" mb={4}>
               Detalles del envío
@@ -109,7 +112,7 @@ export function SeguimientoContent({ envio, pedido, pedidoId, envioId }: Props) 
                   <Text fontSize="sm" color="brand.textMain" fontWeight="medium" fontFamily="mono">#{pedido.id}</Text>
                 </VStack>
                 <VStack align="start" gap={0}>
-                  <Text fontSize="xs" color="brand.textMuted">Estado del pago</Text>
+                  <Text fontSize="xs" color="brand.textMuted">Estado del pedido</Text>
                   <Text fontSize="sm" color="brand.textMain" fontWeight="medium">{ESTADO_PEDIDO_LABEL[pedido.estado]}</Text>
                 </VStack>
                 <VStack align="start" gap={0}>
