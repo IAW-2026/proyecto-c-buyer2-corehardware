@@ -37,6 +37,7 @@ export async function GET(req: NextRequest) {
             cuil_cuit: b.cuilCuit,
             apellido: b.apellido,
             nombre: b.nombre,
+            sexo: b.sexo,
             direccion: b.direccion,
             mail: b.mail,
             celular: b.celular,
