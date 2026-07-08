@@ -59,20 +59,6 @@ export default async function SeguimientoEnvioPage({ searchParams }: PageProps) 
     }
   }
 
-  // Opción B — sincronización en tiempo de lectura
-  if (pedido && envio && envio.estado !== pedido.estado) {
-    try {
-      await prisma.pedido.update({
-        where: { id: pedido.id },
-        data:  { estado: envio.estado },
-      })
-      pedido = { ...pedido, estado: envio.estado as Pedido['estado'] }
-      console.log(`[Sync] Pedido ${pedido.id} actualizado a estado: ${envio.estado}`)
-    } catch (err) {
-      console.error('[Sync] No se pudo sincronizar estado del pedido:', err)
-    }
-  }
-
   return (
     <SeguimientoContent
       envio={envio}
