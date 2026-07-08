@@ -1,6 +1,6 @@
 'use client'
 import { Box, Flex, VStack, Text, Icon } from '@chakra-ui/react'
-import { ENVIO_CONFIG, EstadoEnvio } from '@/utils/seguimientoUtils'
+import { getEnvioConfig } from '@/utils/seguimientoUtils'
 import { BarraEnvio } from '@/components/seguimiento/BarraEnvio'
 
 interface Props {
@@ -8,8 +8,7 @@ interface Props {
 }
 
 export function EstadoEnvioHeader({ estado }: Props) {
-  const estadoEnvio = estado as EstadoEnvio
-  const cfg = ENVIO_CONFIG[estadoEnvio] ?? ENVIO_CONFIG.pending
+  const cfg = getEnvioConfig(estado)
 
   return (
     <Box

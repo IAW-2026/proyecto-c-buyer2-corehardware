@@ -12,7 +12,7 @@ const isPublicRoute = createRouteMatcher([
   '/api/buyers(.*)',
   '/api/seller(.*)',
   '/api/shipping(.*)',
-  '/api/auth/role',
+  '/api/auth/role','/api/dashboard-analytics(.*)',
 ])
 
 const isAdminRoute = createRouteMatcher(['/dashboard(.*)'])
