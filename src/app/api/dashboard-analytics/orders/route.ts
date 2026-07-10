@@ -8,11 +8,17 @@ export async function GET(req: NextRequest) {
     }
 
     const { searchParams } = new URL(req.url);
-    const estado = searchParams.get('estado') ?? undefined;
+    const estadoParam = searchParams.get('estado') ?? undefined;
     const limit = Math.min(parseInt(searchParams.get('limit') ?? '20'), 100);
     const offset = Math.max(parseInt(searchParams.get('offset') ?? '0'), 0);
 
-    const where = estado ? { estado } : {};
+    // Soporta uno o varios estados separados por coma (ej. "EN_PREPARACION,EN_CAMINO")
+    // para permitir filtrar por categoría completa (pago o cumplimiento) en un solo request.
+    const estados = estadoParam
+        ? estadoParam.split(',').map((s) => s.trim()).filter(Boolean)
+        : undefined;
+
+    const where = estados && estados.length > 0 ? { estado: { in: estados } } : {};
 
     const [pedidos, total] = await Promise.all([
         prisma.pedido.findMany({
