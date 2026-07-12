@@ -58,7 +58,10 @@ export async function GET(req: NextRequest) {
         comprador_id: p.compradorId,
         vendedor_id: p.vendedorId,
         monto: p.monto,
+        subtotal_productos: p.subtotalProductos,
+        costo_envio: p.costoEnvio,
         estado: p.estado,
+        productos_id: p.productosId,
     }));
 
     return NextResponse.json({ items, total, limit, offset });

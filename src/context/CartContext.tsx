@@ -13,6 +13,7 @@ import {
 import { useAuth } from '@clerk/nextjs'
 import { ProductSummary } from '@/types/producto'
 import { CartItem } from '@/types/carrito'
+import { calcularCostoEnvio } from '@/lib/envio'
 
 interface CartContextType {
   items: CartItem[]
@@ -92,7 +93,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
   )
 
   const costoEnvio = useMemo(
-    () => (subtotalProductos === 0 || subtotalProductos > 500000 ? 0 : 8500),
+    () => calcularCostoEnvio(subtotalProductos),
     [subtotalProductos]
   )
 
