@@ -21,6 +21,14 @@ const checkoutSchema = z.object({
   monto: z.number()
     .positive('el monto debe ser mayor a cero')
     .max(99999999, 'monto fuera de rango'),
+  subtotalProductos: z.number()
+    .nonnegative('subtotalProductos no puede ser negativo')
+    .max(99999999, 'subtotalProductos fuera de rango')
+    .optional(),
+  costoEnvio: z.number()
+    .nonnegative('costoEnvio no puede ser negativo')
+    .max(99999999, 'costoEnvio fuera de rango')
+    .optional(),
 })
 
 export async function POST(req: NextRequest) {
@@ -52,7 +60,7 @@ export async function POST(req: NextRequest) {
     )
   }
 
-  const { fecha, vendedorId, productos, monto } = result.data
+  const { fecha, vendedorId, productos, monto, subtotalProductos, costoEnvio } = result.data
 
   // 4. Buscar comprador por clerkUserId
   const comprador = await prisma.comprador.findUnique({
@@ -70,6 +78,8 @@ export async function POST(req: NextRequest) {
       vendedorId,
       productosId: productos,
       monto,
+      subtotalProductos: subtotalProductos ?? null,
+      costoEnvio: costoEnvio ?? null,
       estado: 'PENDIENTE_PAGO',
       envioId: null,
     },
@@ -84,6 +94,8 @@ export async function POST(req: NextRequest) {
   }
 
   // 7. Llamar a Payments App con JWT del usuario
+  // Contrato 03-apis.md: no cambia. subtotalProductos/costoEnvio son
+  // internos de Buyer, no forman parte del contrato con Payments.
   const token = await getToken()
   const paymentsPayload = {
     id: nuevoPedido.id,

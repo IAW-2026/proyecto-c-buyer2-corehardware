@@ -59,6 +59,8 @@ export default function CarritoPage() {
         vendedorId: items[0]?.vendedorId ?? 'seller_001',
         productos: productosAplanados,
         monto: total,
+        subtotalProductos,
+        costoEnvio,
       }
 
       const respuestaPago = await PaymentService.iniciarCheckout(pedidoPayload, token)

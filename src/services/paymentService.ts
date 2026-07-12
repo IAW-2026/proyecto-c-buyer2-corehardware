@@ -41,6 +41,8 @@ export interface CheckoutPayload {
   vendedorId: string
   productos: string[]
   monto: number
+  subtotalProductos: number
+  costoEnvio: number
 }
 
 export interface CheckoutResponse {

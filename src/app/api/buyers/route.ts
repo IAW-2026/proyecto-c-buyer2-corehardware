@@ -22,6 +22,7 @@ export async function GET(req: NextRequest) {
         mail: b.mail,
         celular: b.celular,
         condicion_iva: b.condicionIva,
+        fecha_alta: b.createdAt,
     }));
 
     return NextResponse.json(respuesta, { status: 200 });
