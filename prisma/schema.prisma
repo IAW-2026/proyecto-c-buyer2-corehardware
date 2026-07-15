@@ -12,7 +12,7 @@ datasource db {
 }
 
 model Comprador {
-  id              Int      @id @default(autoincrement())
+  id              String   @id @default(cuid())
   dni             String   @unique
   cuilCuit        String   @unique
   apellido        String
@@ -24,41 +24,45 @@ model Comprador {
   fechaNacimiento DateTime
   nacionalidad    String
   condicionIva    String
-  clerkUserId     String   @unique // UserID (Clerk) 
+  clerkUserId     String   @unique
   isDeleted       Boolean  @default(false)
+  perfilCompleto  Boolean  @default(false)
+  createdAt       DateTime @default(now())
   pedidos         Pedido[]
   carrito         Carrito?
 }
 
 model Pedido {
-  id          Int      @id @default(autoincrement())
-  fecha       DateTime @default(now())
-  compradorId Int
+  id          String    @id @default(cuid())
+  fecha       DateTime  @default(now())
+  compradorId String
   comprador   Comprador @relation(fields: [compradorId], references: [id])
-  vendedorId  Int      // Referencia a la Seller App
-  productosId Int[]    // Lista de IDs de productos
+  vendedorId  String
+  productosId String[]
   monto       Float
+  subtotalProductos Float?
+  costoEnvio        Float?
   estado      String
-  envioId     Int?     // Referencia a la Shipping App
+  envioId     String?
 }
 
 model Carrito {
-  id          Int           @id @default(autoincrement())
-  compradorId Int           @unique  // un solo carrito activo por comprador
-  comprador   Comprador     @relation(fields: [compradorId], references: [id])
-  items       CarritoItem[]
-  creadoEn    DateTime      @default(now())
-  actualizadoEn DateTime    @updatedAt
+  id            String        @id @default(cuid())
+  compradorId   String        @unique
+  comprador     Comprador     @relation(fields: [compradorId], references: [id])
+  items         CarritoItem[]
+  creadoEn      DateTime      @default(now())
+  actualizadoEn DateTime      @updatedAt
 }
 
 model CarritoItem {
-  id         Int     @id @default(autoincrement())
-  carritoId  Int
+  id         String  @id @default(cuid())
+  carritoId  String
   carrito    Carrito @relation(fields: [carritoId], references: [id], onDelete: Cascade)
-  productoId Int     // ID del producto en Seller App
-  nombre     String  // Desnormalizado: copiamos el nombre para no depender de Seller App
-  precio     Float   // Desnormalizado: precio al momento de agregar
+  productoId String
+  nombre     String
+  precio     Float
   imagen     String?
   cantidad   Int     @default(1)
-  vendedorId Int     @default(1)
+  vendedorId String
 }

@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Providers } from "./providers";
 import { ClerkProvider } from "@clerk/nextjs";
-import { CartProvider } from "@/context/CartContext"; 
 import { Toaster } from "@/components/ui/toaster"
 import "./globals.css";
 
@@ -18,12 +17,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       afterSignOutUrl="/productos"
     >
       <html lang="es" suppressHydrationWarning>
-        <body>
+        <body suppressHydrationWarning>  {/* ← agregá esto */}
           <Providers>
-            <CartProvider>
-              {children}
-              <Toaster />
-            </CartProvider>
+            {children}
+            <Toaster />
           </Providers>
         </body>
       </html>

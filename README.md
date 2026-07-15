@@ -13,12 +13,7 @@
 
 | Rol | Email | Contraseña |
 |-----|-------|------------|
-| Comprador 1 | `buyer1+clerk_test@iaw.com` | `iawuser#` |
-| Comprador 2 | `buyer2+clerk_test@iaw.com` | `iawuser#` |
-| Comprador 3 | `buyer3+clerk_test@iaw.com` | `iawuser#` |
-| Comprador 4 | `buyer4+clerk_test@iaw.com` | `iawuser#` |
-| Comprador 5 | `buyer5+clerk_test@iaw.com` | `iawuser#` |
-| Comprador 6 | `buyer6+clerk_test@iaw.com` | `iawuser#` |
+| Comprador 1 | `buyer_1+clerk_test@iaw.com` | `iawuser#` |
 | Administrador | `admin+clerk_test@iaw.com` | `iawuser#` |
 
 ---
@@ -26,9 +21,9 @@
 ## 📋 Instrucciones de Uso
 
 1. Accedé al deploy de producción con cualquiera de los usuarios listados arriba.
-2. Los compradores (`buyer1` a `buyer6`) pueden explorar productos, realizar pedidos y hacer el seguimiento de sus envíos.
+2. Los compradores pueden explorar productos, realizar pedidos y hacer el seguimiento de sus envíos.
 3. El administrador (`admin`) tiene acceso al panel de administración con gestión completa de compradores y pedidos.
-4. La aplicación cuenta con datos precargados: compradores registrados, pedidos en distintos estados y envíos en curso, para que puedas recorrer todos los flujos sin necesidad de cargar información manualmente.
+4. La aplicación cuenta con datos precargados: comprador registrado, pedidos en distintos estados y envíos en curso, para que puedas recorrer todos los flujos sin necesidad de cargar información manualmente.
 
 ---
 
@@ -44,10 +39,5 @@ La autenticación está centralizada en Clerk, con roles diferenciados para comp
 
 ## 🗒️ Notas para la Corrección
 
-- **Mocks en Etapa 2:** las llamadas a Seller App, Payments App y Shipping App están mockeadas con datos representativos, ya que la integración real corresponde a la Etapa 3.
 - **Paginación y búsqueda:** implementadas con parámetros en la URL en el listado de productos y en el historial de pedidos del panel de administración.
 - **Variables de entorno:** el archivo `.env.example` en el repositorio lista todas las variables necesarias para correr la app localmente.
-
-## ⚠️ Estado del Proyecto
-
-Por limitaciones de tiempo, el proyecto se entrega con algunas áreas de refactoring pendientes. La funcionalidad principal está completa y operativa, pero la organización interna del código puede mejorarse en futuras iteraciones.

@@ -117,6 +117,7 @@ export async function PUT(req: NextRequest) {
         nombre, apellido, dni, cuilCuit, celular, direccion,
         fechaNacimiento: new Date(fechaNacimiento),
         nacionalidad, sexo: sexo ?? null, condicionIva,
+        perfilCompleto: true,
       },
       create: {
         clerkUserId: userId,
@@ -125,6 +126,7 @@ export async function PUT(req: NextRequest) {
         fechaNacimiento: new Date(fechaNacimiento),
         nacionalidad, sexo: sexo ?? null, condicionIva,
         isDeleted: false,
+        perfilCompleto: true,
       },
     })
   } catch (err: any) {

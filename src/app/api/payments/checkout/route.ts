@@ -1,9 +1,6 @@
 /**
- * API interna de pagos — /api/payments/checkout
- *
- * En Etapa 2: devuelve datos mockeados y crea el Pedido en la BD.
- * En Etapa 3: paymentService.ts apuntará directamente a la app de pagos,
- *             este endpoint quedará como fallback o se eliminará.
+ * /api/payments/checkout
+ * En Etapa 3: paymentService.ts apuntará directamente a la app de pago
  *
  * Contrato acordado en 03-apis.md:
  *   POST /api/checkout
@@ -17,24 +14,37 @@ import { z } from 'zod'
 
 const checkoutSchema = z.object({
   fecha: z.string().optional(),
-  vendedorId: z.number().min(1, 'vendedorId es requerido y debe ser positivo')
-    .int('vendedorId debe ser entero')
-    .positive('vendedorId debe ser positivo'),
-
+  vendedorId: z.string().min(1, 'vendedorId es requerido'),
   productos: z.array(
-    z.number().int().positive('cada producto debe ser un ID positivo')
+    z.string().min(1, 'cada producto debe ser un ID válido')
   ).min(1, 'Debe haber al menos un producto'),
-  monto: z.number().min(0.01, 'monto es requerido y debe ser positivo')
+  monto: z.number()
     .positive('el monto debe ser mayor a cero')
     .max(99999999, 'monto fuera de rango'),
+  subtotalProductos: z.number()
+    .nonnegative('subtotalProductos no puede ser negativo')
+    .max(99999999, 'subtotalProductos fuera de rango')
+    .optional(),
+  costoEnvio: z.number()
+    .nonnegative('costoEnvio no puede ser negativo')
+    .max(99999999, 'costoEnvio fuera de rango')
+    .optional(),
 })
 
 export async function POST(req: NextRequest) {
-  const { userId } = await auth()
+  // 1. Verificar JWT
+  const { userId, getToken } = await auth()
   if (!userId) {
     return NextResponse.json({ message: 'No autorizado' }, { status: 401 })
   }
 
+  // 2. Verificar Payments URL
+  const paymentsUrl = process.env.PAYMENTS_API_URL
+  if (!paymentsUrl) {
+    return NextResponse.json({ message: 'Error de configuración del servidor' }, { status: 500 })
+  }
+
+  // 3. Parsear y validar body
   let body: unknown
   try {
     body = await req.json()
@@ -50,16 +60,17 @@ export async function POST(req: NextRequest) {
     )
   }
 
-  const { fecha, vendedorId, productos, monto } = result.data
-  //Buscar el comprador por clerkUserId — el servidor deduce el compradorId del JWT
+  const { fecha, vendedorId, productos, monto, subtotalProductos, costoEnvio } = result.data
+
+  // 4. Buscar comprador por clerkUserId
   const comprador = await prisma.comprador.findUnique({
     where: { clerkUserId: userId },
   })
-
   if (!comprador || comprador.isDeleted) {
     return NextResponse.json({ message: 'Comprador no encontrado' }, { status: 404 })
   }
 
+  // 5. Crear pedido en nuestra BD
   const nuevoPedido = await prisma.pedido.create({
     data: {
       fecha: fecha ? new Date(fecha) : new Date(),
@@ -67,12 +78,14 @@ export async function POST(req: NextRequest) {
       vendedorId,
       productosId: productos,
       monto,
+      subtotalProductos: subtotalProductos ?? null,
+      costoEnvio: costoEnvio ?? null,
       estado: 'PENDIENTE_PAGO',
       envioId: null,
     },
   })
 
-  //Vaciar el carrito del comprador (si tiene uno)
+  // 6. Vaciar carrito
   const carrito = await prisma.carrito.findUnique({
     where: { compradorId: comprador.id },
   })
@@ -80,15 +93,42 @@ export async function POST(req: NextRequest) {
     await prisma.carritoItem.deleteMany({ where: { carritoId: carrito.id } })
   }
 
-  return NextResponse.json({
-    id: Math.floor(Math.random() * 100000),
-    forma_de_pago: null,                           // MercadoPago lo completa después
-    estado: 'pending',                             // Estado inicial de MercadoPago
-    pedido_id: nuevoPedido.id,
+  // 7. Llamar a Payments App con JWT del usuario
+  // Contrato 03-apis.md: no cambia. subtotalProductos/costoEnvio son
+  // internos de Buyer, no forman parte del contrato con Payments.
+  const token = await getToken()
+  const paymentsPayload = {
+    id: nuevoPedido.id,
     fecha: nuevoPedido.fecha.toISOString(),
-    descripcion: `Pago pedido #${nuevoPedido.id} — CoreHardware`,
-    monto: nuevoPedido.monto,
-    // En Etapa 3, se usara la URL real de MercadoPago:
-    init_point: 'https://sandbox.mercadopago.com.ar/checkout/mock',
-  }, { status: 201 })
+    comprador_id: comprador.id,
+    vendedor_id: vendedorId,
+    productos,
+    monto,
+  }
+
+  const paymentsResponse = await fetch(`${paymentsUrl}/api/checkout`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`,
+    },
+    body: JSON.stringify(paymentsPayload),
+  })
+
+  const paymentsText = await paymentsResponse.text()
+ 
+  // 8. Si Payments falla, cancelamos el pedido
+  if (!paymentsResponse.ok) {
+    await prisma.pedido.update({
+      where: { id: nuevoPedido.id },
+      data: { estado: 'CANCELADO' },
+    })
+    return NextResponse.json(
+      { message: 'Error al procesar el pago' },
+      { status: paymentsResponse.status }
+    )
+  }
+
+  const paymentsData = JSON.parse(paymentsText)
+  return NextResponse.json(paymentsData, { status: 201 })
 }

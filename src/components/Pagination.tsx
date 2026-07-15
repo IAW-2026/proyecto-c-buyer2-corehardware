@@ -18,7 +18,7 @@ export default function Pagination({ totalItems, limit, offset, onPageChange }: 
 
   return (
     <Flex justify="center" mt={16} gap="3" pb={12} align="center" role="navigation" aria-label="Paginación de productos">
-      
+
       {/* BOTÓN ANTERIOR (FLECHA) */}
       <IconButton
         aria-label="Ir a la página anterior"
@@ -61,7 +61,7 @@ export default function Pagination({ totalItems, limit, offset, onPageChange }: 
         align="center" justify="center"
         borderRadius="full"
         fontWeight="black"
-        boxShadow="0 0 15px {colors.brand.accent/26}"
+        boxShadow="0 0 15px rgba(0, 209, 255, 0.26)"
       >
         <Text>{currentPage}</Text>
       </Flex>

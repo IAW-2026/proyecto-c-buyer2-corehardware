@@ -1,4 +1,3 @@
-
 export type EstadoPedido =
   | 'PENDIENTE_PAGO'
   | 'PAGO_APROBADO'
@@ -9,14 +8,15 @@ export type EstadoPedido =
   | 'CANCELADO'
 
 export interface Pedido {
-  id: number
-  fecha: string           // ISO string desde la API
-  comprador_id: number
-  vendedor_id: number
-  productos: number[]     // IDs de productos
+  id: string
+  fecha: string
+  comprador_id: string
+  vendedor_id: string
+  vendedor_nombre: string | null  // null solo si el fetch a Seller falla
+  productos: string[]
   monto: number
   estado: EstadoPedido
-  envio_id: number | null
+  envio_id: string | null
 }
 
 export interface PedidosResponse {
@@ -25,8 +25,6 @@ export interface PedidosResponse {
   limit: number
   offset: number
 }
-
-// ── Tipos de detalle de pedido ─────────────────────────────────────────────
 
 import { ProductSummary } from '@/types/producto'
 

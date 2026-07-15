@@ -1,44 +1,41 @@
 /**
- * Mock interno — GET /api/seller/products
+ * GET /api/seller/products
  *
- * Simula la respuesta de la Seller App de Sebastián.
- * En Etapa 3 este endpoint queda obsoleto — sellerService.ts
- * apuntará directo a NEXT_PUBLIC_SELLER_API_URL.
+ * sellerService.ts apuntará directo a SELLER_API_URL.
  *
  * Soporta los mismos query params que el contrato real:
  *   ?offset=0&limit=10&name=...&brand=...&hasStock=true&seller=...
  */
-
 import { NextRequest, NextResponse } from 'next/server'
-import { MOCK_PRODUCTS_SUMMARY } from '@/data/mockProducts'
+import { getSellerHeaders } from '@/lib/apiHelpers'
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url)
 
-  const offset = parseInt(searchParams.get('offset') ?? '0')
-  const limit  = parseInt(searchParams.get('limit')  ?? '10')
-  const name     = searchParams.get('name')     ?? ''
-  const brand    = searchParams.get('brand')    ?? ''
-  const hasStock = searchParams.get('hasStock') === 'true'
-  const sellerId = searchParams.get('sellerId') ?? ''
-  const seller   = searchParams.get('seller')   ?? ''
-
-  let filtered = [...MOCK_PRODUCTS_SUMMARY]
-
-  if (name)     filtered = filtered.filter(p => p.nombre.toLowerCase().includes(name.toLowerCase()))
-  if (brand)    filtered = filtered.filter(p => p.marca.toLowerCase() === brand.toLowerCase())
-  if (hasStock) filtered = filtered.filter(p => p.stock > 0) 
-  if (sellerId) filtered = filtered.filter(p => p.vendedorId === parseInt(sellerId))
-  if (seller)   filtered = filtered.filter(p => p.vendedor.toLowerCase() === seller.toLowerCase())
-
-  if (filtered.length === 0) {
-    return new NextResponse(null, { status: 204 })
+  const sellerUrl = process.env.SELLER_API_URL
+  if (!sellerUrl) {
+    return NextResponse.json({ message: 'Seller API no configurada' }, { status: 500 })
   }
 
-  const items = filtered.slice(offset, offset + limit)
+  const externalUrl = new URL(`${sellerUrl}/api/products`)
+  searchParams.forEach((value, key) => externalUrl.searchParams.set(key, value))
 
-  return NextResponse.json({
-    items,
-    total: filtered.length,
+  console.log('Llamando a:', externalUrl.toString())
+
+  const response = await fetch(externalUrl.toString(), {
+    method: 'GET',
+    headers: getSellerHeaders(),
   })
+
+  console.log('Seller API status:', response.status)
+  if (!response.ok) {
+    const errorBody = await response.text()
+    console.log('Seller API error body:', errorBody)
+  }
+
+  if (response.status === 204) return new NextResponse(null, { status: 204 })
+  if (response.status === 404) return NextResponse.json({ message: 'No encontrado' }, { status: 404 })
+  if (!response.ok) return NextResponse.json({ message: 'Error en Seller App' }, { status: response.status })
+
+  return NextResponse.json(await response.json())
 }

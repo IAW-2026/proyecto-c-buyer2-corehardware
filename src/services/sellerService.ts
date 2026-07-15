@@ -1,20 +1,8 @@
-/**
- * sellerService.ts — Servicio para consumir la Seller App
- *
- * ARQUITECTURA:
- *   Frontend → sellerService → /api/seller/... (mock interno, Etapa 2)
- *                           → SELLER_API_URL/... (app de Sebastián, Etapa 3)
- *
- * Para pasar a Etapa 3: definir NEXT_PUBLIC_SELLER_API_URL en .env.local
- */
-
 import { Product, ProductSummary } from '@/types/producto'
+import { getSellerHeaders } from '@/lib/apiHelpers'
 
-// ─────────────────────────────────────────────
-// Tipos locales
-// ─────────────────────────────────────────────
 export interface Seller {
-  id: number
+  id: string
   cuit: string
   razon_social: string
   direccion: string
@@ -29,70 +17,80 @@ export interface GetProductsParams {
   name?: string
   brand?: string
   hasStock?: boolean
-  sellerId?: number
+  sellerId?: string
   seller?: string
 }
 
 // ─────────────────────────────────────────────
-// Helper de routing — igual patrón que paymentService
+// SERVER-SIDE
 // ─────────────────────────────────────────────
-function getSellerBaseUrl(): string {
-  // Etapa 3: URL externa de seller
-  if (process.env.NEXT_PUBLIC_SELLER_API_URL) {
-    return process.env.NEXT_PUBLIC_SELLER_API_URL
-  }
-  // Etapa 2: API interna — funciona en local y en Vercel automáticamente
-  if (typeof window !== 'undefined') {
-    return `${window.location.origin}/api/seller`
-  }
-  return '/api/seller'
+
+export async function fetchSellerProducts(
+  params: URLSearchParams
+): Promise<{ items: ProductSummary[]; total: number }> {
+  const sellerUrl = process.env.SELLER_API_URL
+  if (!sellerUrl) throw new Error('SELLER_API_URL no configurada')
+
+  const url = new URL(`${sellerUrl}/api/products`)
+  params.forEach((value, key) => url.searchParams.set(key, value))
+
+  const res = await fetch(url.toString(), {
+    headers: getSellerHeaders(),
+    cache: 'no-store',
+  })
+
+  if (!res.ok) return { items: [], total: 0 }
+  return res.json()
 }
 
-function getHeaders(): HeadersInit {
-  const apiKey = process.env.NEXT_PUBLIC_SELLER_API_KEY
-  return {
-    'Content-Type': 'application/json',
-    ...(apiKey ? { 'X-API-Key': apiKey } : {}),
-  }
+export async function fetchSellerById(id: string): Promise<{ razon_social: string } | null> {
+  const sellerUrl = process.env.SELLER_API_URL
+  if (!sellerUrl) throw new Error('SELLER_API_URL no configurada')
+
+  const res = await fetch(`${sellerUrl}/api/sellers/${id}`, {
+    headers: getSellerHeaders(),
+    cache: 'no-store',
+  })
+
+  if (!res.ok) return null
+  return res.json()
+}
+
+export async function fetchSellerProductById(id: string): Promise<Product | null> {
+  const sellerUrl = process.env.SELLER_API_URL
+  if (!sellerUrl) throw new Error('SELLER_API_URL no configurada')
+
+  const res = await fetch(`${sellerUrl}/api/products/${id}`, {
+    headers: getSellerHeaders(),
+    cache: 'no-store',
+  })
+
+  if (!res.ok) return null
+  return res.json()
 }
 
 // ─────────────────────────────────────────────
-// Servicio
+// CLIENT-SIDE
 // ─────────────────────────────────────────────
+
 export const SellerService = {
-
-  /**
-   * GET /products — lista paginada con filtros
-   */
   async getProducts(
     params: GetProductsParams
   ): Promise<{ items: ProductSummary[]; total: number }> {
     const { offset, limit, name, brand, hasStock, sellerId, seller } = params
-    const base = getSellerBaseUrl()
+    const searchParams = new URLSearchParams()
+    searchParams.set('offset', offset.toString())
+    searchParams.set('limit', limit.toString())
+    if (name)     searchParams.set('name', name)
+    if (brand)    searchParams.set('brand', brand)
+    if (hasStock) searchParams.set('hasStock', 'true')
+    if (sellerId) searchParams.set('sellerId', sellerId)
+    if (seller)   searchParams.set('seller', seller)
 
-    const url = new URL(`${base}/products`, 'http://localhost') // base ficticia para parsear params
-    url.searchParams.set('offset', offset.toString())
-    url.searchParams.set('limit', limit.toString())
-    if (name)     url.searchParams.set('name', name)
-    if (brand)    url.searchParams.set('brand', brand)
-    if (hasStock) url.searchParams.set('hasStock', 'true')
-   if (params.sellerId) url.searchParams.set('sellerId', params.sellerId.toString())
-    if (seller)   url.searchParams.set('seller', seller)
-
-    // Reconstruimos solo el path+query para fetch relativo o absoluto
-    const fetchUrl = base.startsWith('http')
-      ? url.toString()
-      : `${base}/products?${url.searchParams.toString()}`
-
-    const response = await fetch(fetchUrl, {
-      method: 'GET',
-      headers: getHeaders(),
-    })
-
+    const response = await fetch(`/api/seller/products?${searchParams.toString()}`)
     if (response.status === 204) return { items: [], total: 0 }
     if (response.status === 404) return { items: [], total: 0 }
     if (!response.ok) throw new Error(`Error al obtener productos: ${response.status}`)
-
     const data = await response.json()
     return {
       items: data.items ?? data,
@@ -100,37 +98,17 @@ export const SellerService = {
     }
   },
 
-  /**
-   * GET /products/:id — detalle de un producto
-   */
-  async getProductById(id: number): Promise<Product | null> {
-    const base = getSellerBaseUrl()
-
-    const response = await fetch(`${base}/products/${id}`, {
-      method: 'GET',
-      headers: getHeaders(),
-    })
-
+  async getProductById(id: string): Promise<Product | null> {
+    const response = await fetch(`/api/seller/products/${id}`)
     if (response.status === 404) return null
     if (!response.ok) throw new Error(`Error al obtener producto ${id}: ${response.status}`)
-
     return response.json()
   },
 
-  /**
-   * GET /sellers/:id — datos de un vendedor
-   */
-  async getSellerById(id: number): Promise<Seller | null> {
-    const base = getSellerBaseUrl()
-
-    const response = await fetch(`${base}/sellers/${id}`, {
-      method: 'GET',
-      headers: getHeaders(),
-    })
-
+  async getSellerById(id: string): Promise<Seller | null> {
+    const response = await fetch(`/api/seller/sellers/${id}`)
     if (response.status === 404) return null
     if (!response.ok) throw new Error(`Error al obtener vendedor ${id}: ${response.status}`)
-
     return response.json()
   },
 }
